@@ -1,0 +1,18 @@
+@import '../../../src/scss/imports/colors',
+        '../../../src/scss/imports/variables',
+        '../../../bower_components/infra/dist/mixins/mixins';
+
+@import "scss/article",
+        "scss/custom-answer-builder",
+        "scss/essay-question",
+        "scss/free-text-answer-drv",
+        "scss/lecture-question",
+        "scss/math-question",
+        "scss/rate-answer-drv",
+        "scss/reading-question",
+        "scss/select-answer",
+        "scss/shared-question-style",
+        "scss/simple-question",
+        "scss/writing-full-passage",
+        "scss/writing-specific-paragraph",
+        "scss/znk-exercise";
