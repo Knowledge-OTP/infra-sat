@@ -1,0 +1,10 @@
+{
+    "COMPLETE_EXERCISE_SAT": {
+        "COMPLETE_EXERCISE_SUMMARY": {
+            "SUCCESS": "SUCCESS",
+            "CORRECT": "Correct",
+            "WRONG": "Missed",
+            "AVG_TIME": "Avg: {{avgTime}} sec"
+        }
+    }
+}
