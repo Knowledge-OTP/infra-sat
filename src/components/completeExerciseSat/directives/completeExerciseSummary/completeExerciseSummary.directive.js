@@ -43,7 +43,7 @@
 
             function _initStats(){
                 var exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
-                var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
+                // var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
 
                 $ctrl.statsTime = {};
                 var avgTimePropToConvertToSeconds = ['correct', 'wrong'];
