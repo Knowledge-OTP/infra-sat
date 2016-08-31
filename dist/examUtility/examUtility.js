@@ -246,7 +246,7 @@
 
                     if (!getAllSubjectScoresBySubjectProm) {
                         var allSubScoresProm = _getSubScoreCategoryData();
-                        var allSpecificCategoriesProm = CategoryService.getAllSpecificCategories();
+                        var allSpecificCategoriesProm = CategoryService.getAllLevel4Categories();
 
                         getAllSubjectScoresBySubjectProm = $q.all([allSubScoresProm, allSpecificCategoriesProm]).then(function (res) {
                             var allSubScores = res[0];

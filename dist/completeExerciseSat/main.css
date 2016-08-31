@@ -808,6 +808,8 @@ complete-exercise-summary {
     complete-exercise-summary .gauge-row-wrapper .gauge-wrap .chart {
       width: 134px;
       height: 134px; }
+  complete-exercise-summary .review-btn-wrapper {
+    text-align: center; }
   complete-exercise-summary .statistics {
     width: 320px;
     height: 110px;
@@ -1045,3 +1047,55 @@ complete-exercise-summary {
     display: none; }
   complete-exercise-summary.workout-summary-wrapper-essay .proficiency-level-row, complete-exercise-summary.workout-summary-wrapper-essay .social-share {
     background-color: #fafafa; }
+
+.social-sharing-drv-container {
+  width: 100%;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+      justify-content: space-between; }
+
+@keyframes socialAnimate {
+  100% {
+    max-height: 136px; } }
+  .social-sharing-drv-container.social-sharing-drv-container-animate {
+    overflow: hidden;
+    max-height: 0;
+    animation-name: socialAnimate;
+    animation-duration: 0.5s;
+    animation-delay: 0.3s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards; }
+  .social-sharing-drv-container.background-lowest {
+    background-color: #f7f6ec; }
+  .social-sharing-drv-container.background-improved {
+    background-color: #f5fcee; }
+  .social-sharing-drv-container.background-middle-1 {
+    background-color: #ecf7f7; }
+  .social-sharing-drv-container.background-middle-2 {
+    background-color: #eee6f2; }
+  .social-sharing-drv-container.background-highest {
+    background-color: #fafbe5; }
+  .social-sharing-drv-container .share-main-container {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+        flex-direction: column;
+    -ms-flex-align: center;
+        align-items: center;
+    -ms-flex-pack: distribute;
+        justify-content: space-around;
+    min-height: 136px; }
+    .social-sharing-drv-container .share-main-container .social-sharing-title {
+      font-size: 27px;
+      color: #4f4d4d;
+      font-family: Quicksand;
+      font-weight: 700; }
+    .social-sharing-drv-container .share-main-container .social-text {
+      font-size: 16px;
+      color: #4f4d4d;
+      font-family: Quicksand;
+      font-weight: 400; }
+      .social-sharing-drv-container .share-main-container .social-text .bold {
+        font-weight: 700; }

@@ -9,7 +9,8 @@
         'znk.infra-sat.exerciseUtilitySat',
         'znk.infra-sat.examUtility',
         'znk.infra-sat.socialSharingSat',
-        'chart.js'
+        'chart.js',
+        'znk.infra-sat.performance'
     ]);
 })(angular);
 
@@ -204,12 +205,13 @@
         require: {
             completeExerciseCtrl: '^completeExercise'
         },
-        controller: function () {
+        controller: ["CompleteExerciseSrv", "SubjectEnum", "$q", "StatsSrv", "CategoryService", "TestScoreCategoryEnum", "$filter", "masteryLevel", "SubScoreSrv", "PerformanceData", function (CompleteExerciseSrv, SubjectEnum, $q, StatsSrv, CategoryService, TestScoreCategoryEnum, $filter, masteryLevel, SubScoreSrv, PerformanceData) {
             'ngInject';
 
+            var translateFilter = $filter('translate');
             var $ctrl = this;
-
-            function _initSuccessGauge(){
+            var performanceDataProm = PerformanceData.getPerformanceData();
+            function _initSuccessGauge() {
                 var exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
                 var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
 
@@ -232,35 +234,176 @@
 
                 var totalQuestionsNum = exerciseContent.questions.length;
                 var totalCorrectNum = exerciseResult.correctAnswersNum || 0;
-                $ctrl.performanceChart.successRate = parseInt(totalCorrectNum/totalQuestionsNum * 100);
+                $ctrl.performanceChart.successRate = parseInt(totalCorrectNum / totalQuestionsNum * 100);
             }
 
-            function _initStats(){
+            function _initStats() {
                 var exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
                 // var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
 
                 $ctrl.statsTime = {};
-                var avgTimePropToConvertToSeconds = ['correct', 'wrong'];
-                avgTimePropToConvertToSeconds.forEach(function(avgTimeProp){
+                var avgTimePropToConvertToSeconds = ['correct', 'wrong', 'skipped'];
+                avgTimePropToConvertToSeconds.forEach(function (avgTimeProp) {
                     var avgTimePropInResultObj = avgTimeProp + 'AvgTime';
                     $ctrl.statsTime[avgTimePropInResultObj] = parseInt(exerciseResult[avgTimePropInResultObj] / 1000);
                 });
-                // $ctrl.statsTime = {
-                //     correctAvgTime: parseInt(exerciseResult.correctAvgTime / 1000),
-                //     wrongAvgTime: parseInt(exerciseResult.correctAvgTime / 1000),
-                //     rrectAvgTime: parseInt(exerciseResult.correctAvgTime / 1000)
-                // };
             }
 
-            this.$onInit = function(){
+            var _calcMasteryStats = (function(){
+                function _calcAvgPercentage(num, total) {
+                    return Math.round((num / total) * 100);
+                }
+
+                function _calcOldTestScoreMastery(testScoreStats) {
+                    var exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
+
+                    var totalQuestions = testScoreStats.totalQuestions;
+                    var numOfTotalCorrectAnswers = testScoreStats.correct;
+
+                    var numOfExerciseQuestions = exerciseResult.questionResults.length;
+                    var numOfCorrectExerciseAnswers = exerciseResult.correctAnswersNum;
+
+                    var oldNumOfTotalQuestions = totalQuestions - numOfExerciseQuestions;
+                    var oldNumOfCorrectAnswers = numOfTotalCorrectAnswers - numOfCorrectExerciseAnswers;
+
+                    return _calcAvgPercentage(oldNumOfCorrectAnswers, oldNumOfTotalQuestions);
+                }
+
+                function _isAnsweredCorrectly(questionId) {
+                    var questionResult = $ctrl.completeExerciseCtrl.getExerciseResult().questionResults;
+                    return questionResult.some(function (element, index, array) {
+                        var result = array[index];
+                        return questionId === result.questionId && result.isAnsweredCorrectly;
+                    });
+                }
+
+                function _updateRawMastery(practicedCategory, question) {
+                    var categoryId = practicedCategory.id;
+                    if (angular.isUndefined($ctrl.categoryMastery[categoryId])) {
+                        $ctrl.categoryMastery[categoryId] = {};
+                        $ctrl.categoryMastery[categoryId].questionCount = 0;
+                        $ctrl.categoryMastery[categoryId].correctAnswersNum = 0;
+                        $ctrl.categoryMastery[categoryId].name = practicedCategory.name;
+                    }
+                    $ctrl.categoryMastery[categoryId].questionCount++;
+                    $ctrl.categoryMastery[categoryId].correctAnswersNum += _isAnsweredCorrectly(question.id) ? 1 : 0;
+                }
+
+                function _setSubScoreMastery(questions) {
+                    var promArr = [];
+                    angular.forEach(questions, function (question) {
+                        var prom = SubScoreSrv.getSpecificCategorySubScores(question.categoryId).then(function (subScoredArr) {
+                            if (subScoredArr.length > 0) {  // there are questions that not related to any sub score.
+                                angular.forEach(subScoredArr, function (subScore) {
+                                    _updateRawMastery(subScore, question);
+                                });
+                            }
+                        });
+                        promArr.push(prom);
+                    });
+                    return promArr;
+                }
+
+                function _setGeneralMastery(questions) {
+                    var promArr = [];
+                    angular.forEach(questions, function (question) {
+                        var categoryId = question.categoryId;
+                        var prom = CategoryService.getParentCategory(categoryId).then(function (generalCategory) {
+                            _updateRawMastery(generalCategory, question);
+                        });
+                        promArr.push(prom);
+                    });
+                    return promArr;
+                }
+
+                function _getCategoryProgressById(categoriesArray, categoryId) {
+                    for (var i = 0; i < categoriesArray.length; i++) {
+                        if (+categoriesArray[i].categoryId === +categoryId) {
+                            return categoriesArray[i].progress;
+                        }
+                    }
+                }
+
+                function _calcCategoryMastery(categoryRawMastery) {
+                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseContent().subjectId;
+
+                    performanceDataProm.then(function (performanceData) {
+                        var subScoresKeys = Object.keys(categoryRawMastery);
+                        var subScoresArray = performanceData[subjectId].categoryArray;
+
+                        angular.forEach(subScoresKeys, function (subScoreKey) {
+                            var progress = _getCategoryProgressById(subScoresArray, subScoreKey);
+                            categoryRawMastery[subScoreKey].progress = progress;
+                            categoryRawMastery[subScoreKey].mastery = masteryLevel.getMasteryLevel(progress);
+                        });
+                    });
+                }
+
+                return function () {
+                    var exerciseCategoryId = $ctrl.completeExerciseCtrl.getExerciseContent().categoryId;
+
+                    var TEST_SCORE = 2;
+
+                    $ctrl.testScoreMastery = {};
+                    $q.all([
+                        StatsSrv.getLevelStats(TEST_SCORE),
+                        CategoryService.getCategoryLevel2Parent(exerciseCategoryId)
+                    ])
+                        .then(function (res) {
+                            var testScoreStats = res[0];
+                            var testScoreCategory = res[1];
+
+                            var testScoreName = TestScoreCategoryEnum.getValByEnum(testScoreCategory.id);
+                            testScoreName = angular.uppercase(testScoreName);
+                            $ctrl.testScoreMastery.testScorename = translateFilter('COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.' + testScoreName);
+
+                            var TEST_SCORE_ID = 'id_' + testScoreCategory.id;
+                            testScoreStats = testScoreStats[TEST_SCORE_ID];
+                            $ctrl.testScoreMastery.progress = _calcAvgPercentage(testScoreStats.correct, testScoreStats.totalQuestions);
+                            $ctrl.testScoreMastery.mastery = masteryLevel.getMasteryLevel($ctrl.testScoreMastery.progress);
+
+                            var oldTestScoreMastery = _calcOldTestScoreMastery(testScoreStats);
+                            $ctrl.testScoreDelta = $ctrl.testScoreMastery.progress - oldTestScoreMastery;
+                        });
+
+                    $ctrl.categoryMastery = {};
+
+                    var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
+                    var _questions = exerciseContent .questions;
+                    var promArr;
+                    if (exerciseContent .subjectId !== SubjectEnum.ESSAY.enum) {
+                        promArr = _setSubScoreMastery(_questions);
+                    } else {
+                        promArr = _setGeneralMastery(_questions);
+                    }
+                    $q.all(promArr).then(function () {
+                        _calcCategoryMastery($ctrl.categoryMastery);
+                    });
+                };
+            })();
+
+            this.$onInit = function () {
                 _initSuccessGauge();
 
                 _initStats();
 
+                _calcMasteryStats();
+
                 this.exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
                 this.exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
+                this.isEssaySubject = this.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+
+                if(!this.exerciseResult.seenSummary){
+                    this.notSeenSummary = true;
+                    this.exerciseResult.seenSummary = true;
+                    this.exerciseResult.$save();
+                }
+
+                this.goToSummary = function () {
+                    this.completeExerciseCtrl.changeViewState(CompleteExerciseSrv.VIEW_STATES.EXERCISE);
+                };
             };
-        }
+        }]
     });
 })(angular);
 
@@ -940,91 +1083,91 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .controller('SocialSharingController', ["SocialSharingSrv", "$filter", "SubjectEnum", "ENV", "$window", function (SocialSharingSrv, $filter, SubjectEnum, ENV, $window) {
-            'ngInject';
+        .controller('SocialSharingController',
+            ["SocialSharingSrv", "$filter", "SubjectEnum", "ENV", "$window", function (SocialSharingSrv, $filter, SubjectEnum, ENV, $window) {
+                'ngInject';
 
-            var self = this;
-            var translateFilter = $filter('translate');
-            self.showSocialArea = false;
+                var self = this;
+                var translateFilter = $filter('translate');
+                self.showSocialArea = false;
 
-            var subjectMap = {};
-            subjectMap[SubjectEnum.MATH.enum] = 'math';
-            subjectMap[SubjectEnum.VERBAL.enum] = 'verbal';
+                var subjectMap = {};
+                subjectMap[SubjectEnum.MATH.enum] = 'math';
+                subjectMap[SubjectEnum.VERBAL.enum] = 'verbal';
 
-            // return if subjectId is in excludeArr
-            if (self.excludeArr && angular.isArray(self.excludeArr)) {
-                for (var i = 0, ii = self.excludeArr.length; i < ii; i++) {
-                    if (self.subjectId === self.excludeArr[i]) {
-                        return;
+                // return if subjectId is in excludeArr
+                if (self.excludeArr && angular.isArray(self.excludeArr)) {
+                    for (var i = 0, ii = self.excludeArr.length; i < ii; i++) {
+                        if (self.subjectId === self.excludeArr[i]) {
+                            return;
+                        }
                     }
                 }
-            }
 
-            SocialSharingSrv.getSharingData(self.subjectId).then(function (sharingData) {
-                self.showSocialArea = sharingData;
+                SocialSharingSrv.getSharingData(self.subjectId).then(function (sharingData) {
+                    self.showSocialArea = sharingData;
 
-                if (sharingData) {
-                    self.subjectName = subjectMap[self.subjectId];
-                    var image = $window.location.protocol + ENV.zinkerzWebsiteBaseUrl + 'wp-content/themes/salient-child/images/share/' + sharingData.shareUrlMap[self.subjectName];
-                    var descriptionTranslate = sharingData.isImproved ? 'IMPROVED_TEXT' : 'SHARE_DESCRIPTION';
-                    var description = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.' + descriptionTranslate, {
-                        pts: sharingData.points,
-                        subjectName: self.subjectName
-                    });
-                    var title = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_TITLE');
-                    var caption = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_CAPTION');
-                    var url = ENV.zinkezWebsiteUrl;
-                    var ogPrefix = 'og:';
-                    var twitterPrefix = 'twitter:';
-
-
-                    self.shareData = {
-                        facebook: {
-                            type: 'facebook',
-                            facebookurl: url,
-                            facebooktitle: title
-                        }
-                    };
-                    self.shareData.facebook[ogPrefix + 'image'] = image;
-                    self.shareData.facebook[ogPrefix + 'image:width'] = 484;
-                    self.shareData.facebook[ogPrefix + 'image:height'] = 252;
-                    self.shareData.facebook[ogPrefix + 'title'] = title;
-                    self.shareData.facebook[ogPrefix + 'caption'] = caption;
-                    self.shareData.facebook[ogPrefix + 'description'] = description;
-                    self.shareData.facebook['fb:app_id'] = ENV.facebookAppId;
-
-                    self.shareData.google = {
-                        type: 'google',
-                        url: url,
-                        title: title,
-                        description: description,
-                        image: image
-                    };
+                    if (sharingData) {
+                        self.subjectName = subjectMap[self.subjectId];
+                        var image = $window.location.protocol + ENV.zinkerzWebsiteBaseUrl + 'wp-content/themes/salient-child/images/share/' + sharingData.shareUrlMap[self.subjectName];
+                        var descriptionTranslate = sharingData.isImproved ? 'IMPROVED_TEXT' : 'SHARE_DESCRIPTION';
+                        var description = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.' + descriptionTranslate, {
+                            pts: sharingData.points,
+                            subjectName: self.subjectName
+                        });
+                        var title = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_TITLE');
+                        var caption = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_CAPTION');
+                        var url = ENV.zinkezWebsiteUrl;
+                        var ogPrefix = 'og:';
+                        var twitterPrefix = 'twitter:';
 
 
-                    self.shareData.google [ogPrefix + 'image'] = image;
-                    self.shareData.google [ogPrefix + 'image:width'] = 484;
-                    self.shareData.google [ogPrefix + 'image:height'] = 252;
-                    self.shareData.google [ogPrefix + 'title'] = title;
-                    self.shareData.google [ogPrefix + 'description'] = description;
-                    self.shareData.google [ogPrefix + 'url'] = url;
+                        self.shareData = {
+                            facebook: {
+                                type: 'facebook',
+                                facebookurl: url,
+                                facebooktitle: title
+                            }
+                        };
+                        self.shareData.facebook[ogPrefix + 'image'] = image;
+                        self.shareData.facebook[ogPrefix + 'image:width'] = 484;
+                        self.shareData.facebook[ogPrefix + 'image:height'] = 252;
+                        self.shareData.facebook[ogPrefix + 'title'] = title;
+                        self.shareData.facebook[ogPrefix + 'caption'] = caption;
+                        self.shareData.facebook[ogPrefix + 'description'] = description;
+                        self.shareData.facebook['fb:app_id'] = ENV.facebookAppId;
 
-                    self.shareData.twitter = {
-                        type: 'twitter',
-                        description: description,
-                        url: url,
-                        title: title
-                    };
-                    self.shareData.twitter[twitterPrefix + 'card'] = 'summary_large_image';
-                    self.shareData.twitter[twitterPrefix + 'description'] = description;
-                    self.shareData.twitter[twitterPrefix + 'site'] = '@oded300';
-                    self.shareData.twitter[twitterPrefix + 'title'] = title;
-                    self.shareData.twitter[twitterPrefix + 'image'] = image;
-                    self.shareData.twitter[twitterPrefix + 'url'] = url;
-                }
-            })
-            ;
-        }]);
+                        self.shareData.google = {
+                            type: 'google',
+                            url: url,
+                            title: title,
+                            description: description,
+                            image: image
+                        };
+
+
+                        self.shareData.google [ogPrefix + 'image'] = image;
+                        self.shareData.google [ogPrefix + 'image:width'] = 484;
+                        self.shareData.google [ogPrefix + 'image:height'] = 252;
+                        self.shareData.google [ogPrefix + 'title'] = title;
+                        self.shareData.google [ogPrefix + 'description'] = description;
+                        self.shareData.google [ogPrefix + 'url'] = url;
+
+                        self.shareData.twitter = {
+                            type: 'twitter',
+                            description: description,
+                            url: url,
+                            title: title
+                        };
+                        self.shareData.twitter[twitterPrefix + 'card'] = 'summary_large_image';
+                        self.shareData.twitter[twitterPrefix + 'description'] = description;
+                        self.shareData.twitter[twitterPrefix + 'site'] = '@oded300';
+                        self.shareData.twitter[twitterPrefix + 'title'] = title;
+                        self.shareData.twitter[twitterPrefix + 'image'] = image;
+                        self.shareData.twitter[twitterPrefix + 'url'] = url;
+                    }
+                });
+            }]);
 })(angular);
 
 (function(angular){
@@ -1294,15 +1437,17 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\"\n" +
     "     translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\"\n" +
-    "     subject-id-to-attr-drv=\"vm.currentSubjectId\"\n" +
-    "     ng-class=\"{ 'workout-summary-wrapper-essay': vm.currentSubjectId === vm.subjectEnum.ESSAY.enum }\">\n" +
+    "     subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
+    "     ng-class=\"{\n" +
+    "        'workout-summary-wrapper-essay': $ctrl.isEssaySubject\n" +
+    "     }\">\n" +
     "    <complete-exercise-header></complete-exercise-header>\n" +
     "    <social-sharing\n" +
-    "        subject-id=\"::vm.currentSubjectId\"\n" +
+    "        subject-id=\"::$ctrl.exerciseContent.subjectId\"\n" +
     "        animate=\"true\">\n" +
     "    </social-sharing>\n" +
     "    <section>\n" +
-    "        <!--<div class=\"test-score-title\">{{::vm.testScoreTitle}}</div>-->\n" +
+    "        <div class=\"test-score-title\">{{::$ctrl.testScoreTitle}}</div>\n" +
     "        <div class=\"gauge-row-wrapper\">\n" +
     "            <div class=\"overflowWrap\">\n" +
     "                <div class=\"gauge-wrap\">\n" +
@@ -1343,180 +1488,85 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                            </span>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                    <!--<div class=\"stat-row\">-->\n" +
-    "                    <!--<div class=\"stat-val skipped\">{{::vm.results.skippedAnswersNum}}</div>-->\n" +
-    "                    <!--<div class=\"title\" translate=\".SKIPPED\"></div>-->\n" +
-    "                    <!--<div class=\"avg-score\"><span translate=\".AVG\"></span>. {{::vm.avgTime.skippedAvgTime}} <span-->\n" +
-    "                    <!--translate=\".SEC\"></span></div>-->\n" +
-    "                    <!--</div>-->\n" +
+    "                    <div class=\"stat-row\">\n" +
+    "                        <div class=\"stat-val skipped\">{{::$ctrl.exerciseResult.skippedAnswersNum}}</div>\n" +
+    "                        <div class=\"title\" translate=\".SKIPPED\"></div>\n" +
+    "                        <div class=\"avg-score\">\n" +
+    "                            <span translate=\".AVG_TIME\"\n" +
+    "                                  translate-values=\"{\n" +
+    "                                    avgTime: $ctrl.statsTime.skippedAvgTime\n" +
+    "                                  }\">\n" +
+    "                            </span>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
-    "            <div class=\"category-name\">{{vm.categoryName | cutString: 42}}</div>\n" +
+    "            <div class=\"category-name\">{{$ctrl.categoryName | cutString: 42}}</div>\n" +
     "        </div>\n" +
-    "\n" +
-    "        <!--<button autofocus-->\n" +
-    "        <!--tabindex=\"1\"-->\n" +
-    "        <!--class=\"review-button md-button primary\"-->\n" +
-    "        <!--translate=\".REVIEW\"-->\n" +
-    "        <!--ui-sref=\"^.exercise\">-->\n" +
-    "        <!--</button>-->\n" +
+    "        <div class=\"review-btn-wrapper\">\n" +
+    "            <md-button class=\"md-primary znk\"\n" +
+    "                       autofocus\n" +
+    "                       tabindex=\"1\"\n" +
+    "                       md-no-ink\n" +
+    "                       ng-cloak\n" +
+    "                       ng-click=\"$ctrl.goToSummary()\">\n" +
+    "                <span translate=\".REVIEW\"></span>\n" +
+    "            </md-button>\n" +
+    "        </div>\n" +
+    "    </section>\n" +
+    "    <section class=\"time-line-wrapper2\"\n" +
+    "             ng-class=\"{\n" +
+    "                'seen-summary': $ctrl.seenSummary\n" +
+    "             }\">\n" +
+    "        <div class=\"estimated-score-title\">\n" +
+    "            <span translate=\"SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
+    "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
+    "        <performance-timeline\n" +
+    "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
+    "            subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
+    "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
+    "        </performance-timeline>\n" +
     "    </section>\n" +
     "\n" +
-    "    <!--<section class=\"time-line-wrapper2\" -->\n" +
-    "    <!--ng-class=\"{'seen-summary': vm.seenSummary}\">-->\n" +
+    "    <section class=\"proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
+    "        <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
+    "        <div class=\"row data-row\">\n" +
+    "            <div class=\"subject-level\">\n" +
+    "                <div class=\"test-score-name\">{{::$ctrl.testScoreMastery.testScorename}}</div>\n" +
+    "                <div class=\"subject-progress\">\n" +
+    "                    <div class=\"progress\">\n" +
+    "                        <div znk-progress-bar progress-width=\"{{::$ctrl.testScoreMastery.progress}}\"\n" +
+    "                             show-progress-value=\"false\"></div>\n" +
+    "                        <div class=\"title\" translate=\".MASTERY\"></div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"progress-val\">\n" +
+    "                        {{::$ctrl.testScoreMastery.progress}}%\n" +
+    "                        <div class=\"progress-perfect\"\n" +
+    "                             ng-class=\"{\n" +
+    "                                'bad-score': $ctrl.testScoreDelta<0\n" +
+    "                             }\"\n" +
+    "                             ng-if=\"$ctrl.testScoreDelta != 0\">\n" +
+    "                            <span ng-if=\"$ctrl.testScoreDelta > 0\">+</span>\n" +
+    "                            {{$ctrl.testScoreDelta | number : 0}}\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
     "\n" +
-    "    <!--<div class=\"estimated-score-title\">{{vm.subjectName}} <span translate=\".ESTIMATED_SCORE\"></span></div>-->\n" +
-    "    <!--<performance-timeline-->\n" +
-    "    <!--on-timeline-finish=\"vm.onTimelineFinish(subjectDelta)\"-->\n" +
-    "    <!--subject-id=\"{{::vm.currentSubjectId}}\"-->\n" +
-    "    <!--active-exercise-id=\"::vm.activeExerciseId\">-->\n" +
-    "    <!--</performance-timeline>-->\n" +
-    "    <!--</section>-->\n" +
-    "\n" +
-    "    <!--<section class=\"proficiency-level-row animate-if\" ng-if=\"!vm.seenSummary\">-->\n" +
-    "    <!--<div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>-->\n" +
-    "    <!--<div class=\"row data-row\">-->\n" +
-    "    <!--<div class=\"subject-level\">-->\n" +
-    "    <!--<div class=\"test-score-name\">{{::vm.testScoreMastery.testScorename}}</div>-->\n" +
-    "    <!--<div class=\"subject-progress\">-->\n" +
-    "    <!--<div class=\"progress\">-->\n" +
-    "    <!--<div znk-progress-bar progress-width=\"{{::vm.testScoreMastery.progress}}\"-->\n" +
-    "    <!--show-progress-value=\"false\"></div>-->\n" +
-    "    <!--<div class=\"title\" translate=\".MASTERY\"></div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--<div class=\"progress-val\">-->\n" +
-    "    <!--{{::vm.testScoreMastery.progress}}%-->\n" +
-    "    <!--<div class=\"progress-perfect\" ng-class=\"{'bad-score': vm.testScoreDelta<0}\"-->\n" +
-    "    <!--ng-if=\"vm.testScoreDelta != 0\">-->\n" +
-    "    <!--<span ng-if=\"vm.testScoreDelta > 0\">+</span>-->\n" +
-    "    <!--{{vm.testScoreDelta | number : 0}}-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--<div class=\"category-level-wrap\">-->\n" +
-    "    <!--<div class=\"category-level\" ng-repeat=\"(key, category) in vm.categoryMastery\">-->\n" +
-    "    <!--<div class=\"category-data\">-->\n" +
-    "    <!--<div class=\"category-level-name\">{{category.name}}</div>-->\n" +
-    "    <!--<div znk-progress-bar progress-width=\"{{category.progress}}\"-->\n" +
-    "    <!--progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>-->\n" +
-    "    <!--<div class=\"level\">{{category.mastery}}</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</div>-->\n" +
-    "    <!--</section>-->\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"category-level-wrap\">\n" +
+    "                <div class=\"category-level\" ng-repeat=\"(key, category) in $ctrl.categoryMastery\">\n" +
+    "                    <div class=\"category-data\">\n" +
+    "                        <div class=\"category-level-name\">{{category.name}}</div>\n" +
+    "                        <div znk-progress-bar progress-width=\"{{category.progress}}\"\n" +
+    "                             progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>\n" +
+    "                        <div class=\"level\">{{category.mastery}}</div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </section>\n" +
     "</div>\n" +
-    "\n" +
-    "<!--<div class=\"workout-summary-wrapper base-border-radius\"-->\n" +
-    "<!--subject-id-to-attr-drv=\"vm.currentSubjectId\"-->\n" +
-    "<!--translate-namespace=\"WORKOUTS_WORKOUT_SUMMARY\"-->\n" +
-    "<!--ng-class=\"{ 'workout-summary-wrapper-essay': vm.currentSubjectId === vm.subjectEnum.ESSAY.enum }\">-->\n" +
-    "\n" +
-    "<!--<znk-exercise-header subject-id=\"vm.currentSubjectId\"-->\n" +
-    "<!--side-text=\"{{::vm.headerTitle}}\"-->\n" +
-    "<!--options=\"{ showQuit: true }\"-->\n" +
-    "<!--on-clicked-quit=\"vm.onHeaderQuit()\">-->\n" +
-    "<!--</znk-exercise-header>-->\n" +
-    "\n" +
-    "<!--<social-sharing-drv-->\n" +
-    "<!--subject-id=\"::vm.currentSubjectId\"-->\n" +
-    "<!--animate=\"true\">-->\n" +
-    "<!--</social-sharing-drv>-->\n" +
-    "\n" +
-    "<!--<section>-->\n" +
-    "<!--<div class=\"test-score-title\">{{::vm.testScoreTitle}}</div>-->\n" +
-    "\n" +
-    "<!--<div class=\"gauge-row-wrapper\">-->\n" +
-    "<!--<div class=\"overflowWrap\">-->\n" +
-    "<!--<div class=\"gauge-wrap\">-->\n" +
-    "<!--<div class=\"gauge-inner-text\">{{::vm.gaugeSuccessRate}}%-->\n" +
-    "<!--<div class=\"success-title\" translate=\".SUCCESS\"></div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--<canvas-->\n" +
-    "<!--id=\"doughnut\"-->\n" +
-    "<!--class=\"chart chart-doughnut\"-->\n" +
-    "<!--chart-options=\"vm.performenceChart.options\"-->\n" +
-    "<!--chart-colours=\"vm.performenceChart.colours\"-->\n" +
-    "<!--chart-data=\"vm.performenceChart.data\"-->\n" +
-    "<!--chart-labels=\"vm.performenceChart.labels\"-->\n" +
-    "<!--chart-legend=\"false\">-->\n" +
-    "<!--</canvas>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--<div class=\"statistics\">-->\n" +
-    "<!--<div class=\"stat-row\">-->\n" +
-    "<!--<div class=\"stat-val correct\">{{::vm.results.correctAnswersNum}}</div>-->\n" +
-    "<!--<div class=\"title\" translate=\".CORRECT\"></div>-->\n" +
-    "<!--<div class=\"avg-score\"><span translate=\".AVG\"></span>. {{::vm.avgTime.correctAvgTime}} <span translate=\".SEC\"></span> </div>-->\n" +
-    "<!--</div>-->\n" +
-    "\n" +
-    "<!--<div class=\"stat-row\">-->\n" +
-    "<!--<div class=\"stat-val wrong\">{{::vm.results.wrongAnswersNum}}</div>-->\n" +
-    "<!--<div class=\"title\" translate=\".WRONG\"></div>-->\n" +
-    "<!--<div class=\"avg-score\"><span translate=\".AVG\"></span>. {{::vm.avgTime.wrongAvgTime}} <span translate=\".SEC\"></span></div>-->\n" +
-    "<!--</div>-->\n" +
-    "\n" +
-    "<!--<div class=\"stat-row\">-->\n" +
-    "<!--<div class=\"stat-val skipped\">{{::vm.results.skippedAnswersNum}}</div>-->\n" +
-    "<!--<div class=\"title\" translate=\".SKIPPED\"></div>-->\n" +
-    "<!--<div class=\"avg-score\"><span translate=\".AVG\"></span>. {{::vm.avgTime.skippedAvgTime}}  <span translate=\".SEC\"></span></div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "\n" +
-    "<!--<div class=\"category-name\">{{vm.categoryName | cutString: 42}}</div>-->\n" +
-    "<!--</div>-->\n" +
-    "\n" +
-    "<!--<button autofocus tabindex=\"1\"-->\n" +
-    "<!--class=\"review-button md-button primary\"-->\n" +
-    "<!--translate=\".REVIEW\"-->\n" +
-    "<!--ui-sref=\"^.exercise\"></button>-->\n" +
-    "<!--</section>-->\n" +
-    "\n" +
-    "<!--<section class=\"time-line-wrapper2\"  ng-class=\"{'seen-summary': vm.seenSummary}\">-->\n" +
-    "\n" +
-    "<!--<div class=\"estimated-score-title\">{{vm.subjectName}} <span translate=\".ESTIMATED_SCORE\"></span> </div>-->\n" +
-    "<!--<performance-timeline-->\n" +
-    "<!--on-timeline-finish=\"vm.onTimelineFinish(subjectDelta)\"-->\n" +
-    "<!--subject-id=\"{{::vm.currentSubjectId}}\"-->\n" +
-    "<!--active-exercise-id=\"::vm.activeExerciseId\">-->\n" +
-    "<!--</performance-timeline>-->\n" +
-    "<!--</section>-->\n" +
-    "\n" +
-    "<!--<section class=\"proficiency-level-row animate-if\" ng-if=\"!vm.seenSummary\">-->\n" +
-    "<!--<div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>-->\n" +
-    "<!--<div class=\"row data-row\">-->\n" +
-    "<!--<div class=\"subject-level\">-->\n" +
-    "<!--<div class=\"test-score-name\">{{::vm.testScoreMastery.testScorename}}</div>-->\n" +
-    "<!--<div class=\"subject-progress\">-->\n" +
-    "<!--<div class=\"progress\">-->\n" +
-    "<!--<div znk-progress-bar progress-width=\"{{::vm.testScoreMastery.progress}}\" show-progress-value=\"false\"></div>-->\n" +
-    "<!--<div class=\"title\" translate=\".MASTERY\"></div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--<div class=\"progress-val\">-->\n" +
-    "<!--{{::vm.testScoreMastery.progress}}%-->\n" +
-    "<!--<div class=\"progress-perfect\" ng-class=\"{'bad-score': vm.testScoreDelta<0}\" ng-if=\"vm.testScoreDelta != 0\">-->\n" +
-    "<!--<span ng-if=\"vm.testScoreDelta > 0\">+</span>-->\n" +
-    "<!--{{vm.testScoreDelta | number : 0}}-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--<div class=\"category-level-wrap\">-->\n" +
-    "<!--<div class=\"category-level\" ng-repeat=\"(key, category) in vm.categoryMastery\">-->\n" +
-    "<!--<div class=\"category-data\">-->\n" +
-    "<!--<div class=\"category-level-name\">{{category.name}} </div>-->\n" +
-    "<!--<div znk-progress-bar progress-width=\"{{category.progress}}\" progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>-->\n" +
-    "<!--<div class=\"level\">{{category.mastery}}</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</div>-->\n" +
-    "<!--</section>-->\n" +
-    "<!--</div>-->\n" +
     "");
   $templateCache.put("components/completeExerciseSat/directives/socialSharing/socialSharing.template.html",
     "<div class=\"social-sharing-drv-container\"\n" +
