@@ -2,6 +2,7 @@
     'use strict';
 
     angular.module('demo', [
+        'demoEnv',
         'znk.infra-sat.completeExerciseSat'
     ])
         .config(function($sceProvider){

@@ -44,6 +44,7 @@ module.exports = function (config) {
             'bower_components/angular-chart.js/dist/angular-chart.js',
             'bower_components/v-accordion/dist/v-accordion.js',
             'bower_components/infra-web-app/dist/main.js',
+            'bower_components/angularfire/dist/angularfire.js',
             'bower_components/es5-shim/es5-shim.js',
             'bower_components/angular-mocks/angular-mocks.js',
             'bower_components/mockfirebase/browser/mockfirebase.js',

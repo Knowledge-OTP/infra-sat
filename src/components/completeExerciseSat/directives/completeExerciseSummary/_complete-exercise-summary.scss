@@ -50,6 +50,10 @@ complete-exercise-summary{
         }
     }
 
+    .review-btn-wrapper{
+        text-align: center;
+    }
+
     .statistics {
         @include dimension(320px, 110px);
         @include display-flex;

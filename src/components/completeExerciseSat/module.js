@@ -9,6 +9,7 @@
         'znk.infra-sat.exerciseUtilitySat',
         'znk.infra-sat.examUtility',
         'znk.infra-sat.socialSharingSat',
-        'chart.js'
+        'chart.js',
+        'znk.infra-sat.performance'
     ]);
 })(angular);
