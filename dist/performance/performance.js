@@ -3,7 +3,8 @@
 
     angular.module('znk.infra-sat.performance', [
         'znk.infra-sat.userGoals',
-        'znk.infra.znkTimeline'
+        'znk.infra.znkTimeline',
+        'znk.infra.znkProgressBar'
     ]);
 })(angular);
 
@@ -205,28 +206,6 @@
                     bindToController: true,
                     controllerAs: 'vm'
                 };
-                return directive;
-            }
-        );
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.performance')
-        .directive('znkProgressBar', function znkProgressBarDirective() {
-                'ngInject';
-
-                var directive = {
-                    templateUrl: 'components/performance/directives/znkProgressBar/znkProgressBar.template.html',
-                    scope: {
-                        progressWidth: '@',
-                        progressValue: '@',
-                        showProgressValue: '@',
-                        showProgressBubble: '&'
-                    }
-                };
-
                 return directive;
             }
         );
@@ -472,25 +451,5 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function($tem
     "        <canvas znk-timeline timeline-data=\"vm.timeLineData\" timeline-settings=\"vm.options\"></canvas>\n" +
     "    </div>\n" +
     "</div>\n" +
-    "");
-  $templateCache.put("components/performance/directives/znkProgressBar/znkProgressBar.template.html",
-    "<div ng-if=\"::showProgressBubble()\" class=\"progress-bubble-wrapper\" ng-style=\"{left: (progressWidth || 0) + '%'}\">\n" +
-    "    <div class=\"progress-percentage\">\n" +
-    "        <div>{{progressWidth}}%<div  translate=\"ZNK_PROGRESS_BAR.MASTERY\"></div></div>\n" +
-    "    </div>\n" +
-    "    <div  class=\"progress-bubble\" >\n" +
-    "        <div class=\"down-triangle gray-triangle\"></div>\n" +
-    "        <div class=\"down-triangle\"></div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"progress-wrap\">\n" +
-    "    <div class=\"progress\" ng-style=\"{width: progressWidth + '%'}\"></div>\n" +
-    "    <div class=\"answer-count ng-hide\" ng-show=\"{{::showProgressValue}}\">{{progressValue}}</div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
     "");
 }]);
