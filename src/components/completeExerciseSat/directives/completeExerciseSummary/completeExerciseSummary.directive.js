@@ -198,7 +198,7 @@
                 this.exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
                 this.isEssaySubject = this.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
 
-                if(!this.exerciseResult.seenSummary){
+                if(this.exerciseResult.seenSummary){
                     this.notSeenSummary = true;
                     this.exerciseResult.seenSummary = true;
                     this.exerciseResult.$save();
