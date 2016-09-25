@@ -6,8 +6,8 @@
             'ngInject';
 
             var svgMap = {
-                'correct-icon': 'components/completeExerciseSat/svg/correct-icon.svg',
-                'wrong-icon': 'components/completeExerciseSat/svg/wrong-icon.svg'
+                'complete-exercise-correct-icon': 'components/completeExerciseSat/svg/correct-icon.svg',
+                'complete-exercise-wrong-icon': 'components/completeExerciseSat/svg/wrong-icon.svg'
             };
             SvgIconSrvProvider.registerSvgSources(svgMap);
         });
