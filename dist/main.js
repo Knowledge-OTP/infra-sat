@@ -3021,7 +3021,7 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
     'use strict';
 
     angular.module('znk.infra-sat.userGoals', [
-        'znk.infra-sat.auth'
+        'znk.infra.auth'
     ]);
 })(angular);
 
