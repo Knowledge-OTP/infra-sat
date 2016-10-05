@@ -2,8 +2,7 @@
     'use strict';
 
     angular.module('znk.infra-sat', [
-        "znk.infra-sat.auth",
-"znk.infra-sat.completeExerciseSat",
+        "znk.infra-sat.completeExerciseSat",
 "znk.infra-sat.configSat",
 "znk.infra-sat.examUtility",
 "znk.infra-sat.exerciseUtilitySat",
@@ -12,191 +11,6 @@
 "znk.infra-sat.userGoals"
     ]);
 })(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.auth', [
-        'firebase'
-    ]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.auth')
-        .service('AuthService', ["$window", "StorageFirebaseAdapter", "StorageSrv", "$firebaseAuth", "ENV", "$q", "$timeout", "$rootScope", "$http", "$log", function ($window, StorageFirebaseAdapter, StorageSrv, $firebaseAuth, ENV, $q, $timeout, $rootScope, $http, $log) {
-            'ngInject';
-
-            var refAuthDB = new $window.Firebase(ENV.fbGlobalEndPoint, ENV.firebaseAppScopeName);
-            var refDataDB = new $window.Firebase(ENV.fbDataEndPoint, ENV.firebaseAppScopeName);
-            var fbAuth = $firebaseAuth(refAuthDB);
-
-            var self = this;
-            this.saveRegistration = function (registration, login) {
-                var registerInProgress = true;
-                var dfd = $q.defer();
-                this.logout(true);
-
-                var timeoutPromise = $timeout(function () {
-                    if (registerInProgress) {
-                        dfd.reject('timeout');
-                    }
-                }, ENV.promiseTimeOut);
-
-                registration.profile = {};
-
-                fbAuth.$createUser(registration).then(function () {
-                    registerInProgress = false;
-                    $timeout.cancel(timeoutPromise);
-
-                    if (login) {
-                        self.login({
-                            email: registration.email,
-                            password: registration.password
-                        }).then(function (loginData) {
-                            self.registerFirstLogin();
-                            dfd.resolve(loginData);
-                        }, function (err) {
-                            dfd.reject(err);
-                        });
-                    } else {
-                        dfd.resolve();
-                    }
-                }, function (error) {
-                    $timeout.cancel(timeoutPromise);
-                    dfd.reject(error);
-                });
-                return dfd.promise;
-            };
-
-            function _dataLogin() {
-                var postUrl = ENV.backendEndpoint + 'firebase/token';
-                var authData = refAuthDB.getAuth();
-                var postData = {
-                    email: authData.password ? authData.password.email : '',
-                    uid: authData.uid,
-                    fbDataEndPoint: ENV.fbDataEndPoint,
-                    fbEndpoint: ENV.fbGlobalEndPoint,
-                    auth: ENV.dataAuthSecret,
-                    token: authData.token
-                };
-
-                return $http.post(postUrl, postData).then(function (token) {
-                    var defer = $q.defer();
-                    refDataDB.authWithCustomToken(token.data, function (error, userAuthData) {
-                        if (error) {
-                            defer.reject(error);
-                        }
-                        $log.debug('authSrv::login(): uid=' + userAuthData.uid);
-                        defer.resolve(userAuthData);
-                    });
-                    return defer.promise;
-                });
-            }
-
-            function _$onAuth(data) {
-                var _loginAuthData = data;
-
-                if (_loginAuthData) {
-                    return _dataLogin(_loginAuthData).then(function () {
-                        $rootScope.$broadcast('auth:login', _loginAuthData);
-                    });
-                }
-                $rootScope.$broadcast('auth:logout');
-                return $q.when();
-            }
-
-            this.login = function (loginData) {
-                var deferred = $q.defer();
-
-                fbAuth.$unauth();
-
-                fbAuth.$authWithPassword(loginData).then(function (authData) {
-                    $log.debug('authSrv::login(): uid=' + authData.uid);
-                    _$onAuth(authData).then(function () {
-                        deferred.resolve(authData);
-                    });
-                }).catch(function (err) {
-                    self.logout();
-                    deferred.reject(err);
-                });
-
-                return deferred.promise;
-            };
-
-            this.logout = function () {
-                $rootScope.$broadcast('auth:beforeLogout');
-                fbAuth.$unauth();
-
-                var actAuth = $firebaseAuth(refDataDB);
-                actAuth.$unauth();
-            };
-
-            this.forgotPassword = function (forgotPasswordData) {
-                return fbAuth.$resetPassword(forgotPasswordData);
-            };
-
-            this.changePassword = function (changePasswordData) {
-                var authData = this.getAuth();
-                if (authData && authData.password) {
-                    changePasswordData.email = authData.password.email;
-                    return fbAuth.$changePassword(changePasswordData);
-                }
-                return $q.reject();
-            };
-
-            this.getAuth = function () {
-                return refAuthDB.getAuth();
-            };
-
-            this.createAuthWithCustomToken = function (refDB, token) {
-                var deferred = $q.defer();
-                refDB.authWithCustomToken(token, function (error, userData) {
-                    if (error) {
-                        deferred.reject(error);
-                    }
-                    $log.debug('createAuthWithCustomToken: uid=' + userData.uid);
-                    deferred.resolve(userData);
-                });
-                return deferred.promise;
-            };
-
-            this.userDataForAuthAndDataFb = function (data) {
-                var proms = [
-                    this.createAuthWithCustomToken(refAuthDB, data.authToken),
-                    this.createAuthWithCustomToken(refDataDB, data.dataToken)
-                ];
-                return $q.all(proms);
-            };
-
-            this.registerFirstLogin = function () {
-                var storageSrv = storageObj();
-                var firstLoginPath = 'firstLogin/' + this.getAuth().uid;
-                return storageSrv.get(firstLoginPath).then(function (userFirstLoginTime) {
-                    if (angular.equals(userFirstLoginTime, {})) {
-                        storageSrv.set(firstLoginPath, Date.now());
-                    }
-                });
-            };
-
-            function storageObj (){
-                var fbAdapter = new StorageFirebaseAdapter(ENV.fbDataEndPoint + '/' + ENV.firebaseAppScopeName);
-                var config = {
-                    variables: {
-                        uid: function () {
-                            return self.getAuth().uid;
-                        }
-                    }
-                };
-                return new StorageSrv(fbAdapter, config);
-            }
-        }]);
-})(angular);
-
-angular.module('znk.infra-sat.auth').run(['$templateCache', function($templateCache) {
-
-}]);
 
 (function (angular) {
     'use strict';
@@ -222,8 +36,8 @@ angular.module('znk.infra-sat.auth').run(['$templateCache', function($templateCa
             'ngInject';
 
             var svgMap = {
-                'correct-icon': 'components/completeExerciseSat/svg/correct-icon.svg',
-                'wrong-icon': 'components/completeExerciseSat/svg/wrong-icon.svg'
+                'complete-exercise-correct-icon': 'components/completeExerciseSat/svg/correct-icon.svg',
+                'complete-exercise-wrong-icon': 'components/completeExerciseSat/svg/wrong-icon.svg'
             };
             SvgIconSrvProvider.registerSvgSources(svgMap);
         }]);
@@ -1886,8 +1700,8 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "    <div ng-switch-when=\"true\" class=\"answer-status-wrapper\" ng-class=\"userAnswerStatus\">\n" +
     "        <div class=\"answer-status\">\n" +
     "            <div class=\"user-answer\">{{d.userAnswer}}</div>\n" +
-    "            <svg-icon class=\"correct-icon\" name=\"correct\"></svg-icon>\n" +
-    "            <svg-icon class=\"wrong-icon\" name=\"wrong-icon\"></svg-icon>\n" +
+    "            <svg-icon class=\"correct-icon\" name=\"complete-exercise-correct-icon\"></svg-icon>\n" +
+    "            <svg-icon class=\"wrong-icon\" name=\"complete-exercise-wrong-icon\"></svg-icon>\n" +
     "        </div>\n" +
     "        <div class=\"correct-answer\">\n" +
     "            <span translate=\".CORRECT_ANSWER\"></span>\n" +
@@ -1931,8 +1745,8 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "<div class=\"rate-answer-wrapper\">\n" +
     "    <div class=\"checkbox-items-wrapper\" >\n" +
     "        <div class=\"item-repeater\" ng-repeat=\"item in d.itemsArray track by $index\">\n" +
-    "            <svg-icon class=\"correct-icon\" name=\"correct-icon\"></svg-icon>\n" +
-    "            <svg-icon class=\"wrong-icon\" name=\"wrong-icon\"></svg-icon>\n" +
+    "            <svg-icon class=\"correct-icon\" name=\"complete-exercise-correct-icon\"></svg-icon>\n" +
+    "            <svg-icon class=\"wrong-icon\" name=\"complete-exercise-wrong-icon\"></svg-icon>\n" +
     "            <div class=\"checkbox-item\" ng-click=\"clickHandler($index)\">\n" +
     "                <div class=\"item-index\">{{$index +  2}}</div>\n" +
     "            </div>\n" +
@@ -1969,8 +1783,8 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            <span class=\"index-char\">{{::d.getIndexChar($index)}}</span>\n" +
     "        </div>\n" +
     "        <markup content=\"answer.content\" type=\"md\" class=\"content\"></markup>\n" +
-    "        <svg-icon class=\"correct-icon-drv\" name=\"correct-icon\"></svg-icon>\n" +
-    "        <svg-icon class=\"wrong-icon-drv\" name=\"wrong-icon\"></svg-icon>\n" +
+    "        <svg-icon class=\"correct-icon-drv\" name=\"complete-exercise-correct-icon\"></svg-icon>\n" +
+    "        <svg-icon class=\"wrong-icon-drv\" name=\"complete-exercise-wrong-icon\"></svg-icon>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -2048,6 +1862,144 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
 
     angular.module('znk.infra-sat.configSat', []);
 })(angular);
+
+(function () {
+    'use strict';
+
+    angular.module('znk.infra-sat.configSat')
+        .decorator('CategoryService', ["$delegate", "$q", "EnumSrv", function ($delegate, $q, EnumSrv) {
+            'ngInject';
+
+            var categoryService = $delegate;
+            var categoryTypeEnum = new EnumSrv.BaseEnum([
+                ['TUTORIAL', 1, 'tutorial'],
+                ['EXERCISE', 2, 'exercise'],
+                ['MINI_CHALLENGE', 3, 'miniChallenge'],
+                ['SECTION', 4, 'section'],
+                ['DRILL', 5, 'drill'],
+                ['GENERAL', 6, 'general'],
+                ['SPECIFIC', 7, 'specific'],
+                ['STRATEGY', 8, 'strategy'],
+                ['SUBJECT', 9, 'subject'],
+                ['SUB_SCORE', 10, 'subScore'],
+                ['TEST_SCORE', 11, 'testScore']
+            ]);
+
+            categoryService.getSubjectIdByCategory = function (category) {
+                if (category.typeId === categoryTypeEnum.SUBJECT.enum) {
+                    return $q.when(category.id);
+                }
+                return categoryService.getParentCategory(category.id).then(function (parentCategory) {
+                    return categoryService.getSubjectIdByCategory(parentCategory);
+                });
+            };
+
+            categoryService.getTestScore = function (categoryId) {
+                return categoryService.getCategoryMap().then(function (categories) {
+                    var category = categories[categoryId];
+                    if (categoryTypeEnum.TEST_SCORE.enum === category.typeId) {
+                        return category;
+                    }
+                    return categoryService.getTestScore(category.parentId);
+                });
+            };
+
+            categoryService.getAllGeneralCategories = (function () {
+                var getAllGeneralCategoriesProm;
+                return function () {
+                    if (!getAllGeneralCategoriesProm) {
+                        getAllGeneralCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
+                            var generalCategories = {};
+                            angular.forEach(categories, function (category) {
+                                if (category.typeId === categoryTypeEnum.GENERAL.enum) {
+                                    generalCategories[category.id] = category;
+                                }
+                            });
+                            return generalCategories;
+                        });
+                    }
+                    return getAllGeneralCategoriesProm;
+                };
+            })();
+
+            categoryService.getAllGeneralCategoriesBySubjectId = (function () {
+                var getAllGeneralCategoriesBySubjectIdProm;
+                return function (subjectId) {
+                    if (!getAllGeneralCategoriesBySubjectIdProm) {
+                        getAllGeneralCategoriesBySubjectIdProm = categoryService.getAllGeneralCategories().then(function (categories) {
+                            var generalCategories = {};
+                            var promArray = [];
+                            angular.forEach(categories, function (generalCategory) {
+                                var prom = categoryService.getSubjectIdByCategory(generalCategory).then(function (currentCategorySubjectId) {
+                                    if (currentCategorySubjectId === subjectId) {
+                                        generalCategories[generalCategory.id] = generalCategory;
+                                    }
+                                });
+                                promArray.push(prom);
+                            });
+                            return $q.all(promArray).then(function () {
+                                return generalCategories;
+                            });
+                        });
+                    }
+                    return getAllGeneralCategoriesBySubjectIdProm;
+                };
+            })();
+
+            categoryService.getAllSpecificCategories = (function () {
+                var getAllSpecificCategoriesProm;
+                return function () {
+                    if (!getAllSpecificCategoriesProm) {
+                        getAllSpecificCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
+                            var specificCategories = {};
+                            angular.forEach(categories, function (category) {
+                                if (category.typeId === categoryTypeEnum.SPECIFIC.enum) {
+                                    specificCategories[category.id] = category;
+                                }
+                            });
+                            return specificCategories;
+                        });
+                    }
+                    return getAllSpecificCategoriesProm;
+                };
+            })();
+
+            categoryService.getAllGeneralCategoriesBySubjectId = (function () {
+                var getAllGeneralCategoriesBySubjectIdProm;
+                return function (subjectId) {
+                    if (!getAllGeneralCategoriesBySubjectIdProm) {
+                        getAllGeneralCategoriesBySubjectIdProm = categoryService.getAllGeneralCategories().then(function (categories) {
+                            var generalCategories = {};
+                            var promArray = [];
+                            angular.forEach(categories, function (generalCategory) {
+                                var prom = categoryService.getSubjectIdByCategory(generalCategory).then(function (currentCategorySubjectId) {
+                                    if (currentCategorySubjectId === subjectId) {
+                                        generalCategories[generalCategory.id] = generalCategory;
+                                    }
+                                });
+                                promArray.push(prom);
+                            });
+                            return $q.all(promArray).then(function () {
+                                return generalCategories;
+                            });
+                        });
+                    }
+                    return getAllGeneralCategoriesBySubjectIdProm;
+                };
+            })();
+
+            categoryService.getSubjectIdByCategory = function (category) {
+                if (category.typeId === categoryTypeEnum.SUBJECT.enum) {
+                    return $q.when(category.id);
+                }
+                return categoryService.getParentCategory(category.id).then(function (parentCategory) {
+                    return categoryService.getSubjectIdByCategory(parentCategory);
+                });
+            };
+
+            return categoryService;
+        }]);
+})();
 
 (function () {
     'use strict';
@@ -2302,94 +2254,6 @@ angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templ
             };
         }]);
 })();
-
-(function(angular){
-    'use strict';
-
-    angular.module('znk.infra-sat.examUtility')
-        .service('SubScoreSrv', ["CategoryService", "$q", "StorageRevSrv", "SubjectEnum", function(CategoryService, $q, StorageRevSrv, SubjectEnum) {
-            'ngInject';
-
-            function _getSubScoreCategoryData() {
-                return StorageRevSrv.getContent({
-                    exerciseId: null,
-                    exerciseType: 'subscoreCategory'
-                });
-            }
-
-            function _getSubScoreData(subScoreId) {
-                return _getSubScoreCategoryData().then(function (subScoresCategoryData) {
-                    return subScoresCategoryData[subScoreId];
-                });
-            }
-
-            this.getSpecificCategorySubScores = function (specificCategoryId) {
-                return CategoryService.getCategoryData(specificCategoryId).then(function (specificCategoryData) {
-                    var allProm = [];
-                    var subScoreKeys = ['subScore1Id', 'subScore2Id'];
-                    angular.forEach(subScoreKeys, function (subScoreKey) {
-                        var subScoreId = specificCategoryData[subScoreKey];
-                        if (subScoreId || subScoreId === 0) {
-                            allProm.push(_getSubScoreData(subScoreId));
-                        }
-                    });
-                    return $q.all(allProm);
-                });
-            };
-
-            this.getAllSubScoresBySubject = (function () {
-                var getAllSubjectScoresBySubjectProm;
-                return function () {
-                    function _getMathOrVerbalSubjectIdIfCategoryNotEssay(category) {
-                        return CategoryService.getSubjectIdByCategory(category).then(function (subjectId) {
-                            if (subjectId === SubjectEnum.MATH.enum || subjectId === SubjectEnum.VERBAL.enum) {
-                                return subjectId;
-                            }
-                        });
-                    }
-
-                    if (!getAllSubjectScoresBySubjectProm) {
-                        var allSubScoresProm = _getSubScoreCategoryData();
-                        var allSpecificCategoriesProm = CategoryService.getAllLevel4Categories();
-
-                        getAllSubjectScoresBySubjectProm = $q.all([allSubScoresProm, allSpecificCategoriesProm]).then(function (res) {
-                            var allSubScores = res[0];
-                            var allSpecificCategories = res[1];
-                            var subScorePerSubject = {};
-                            subScorePerSubject[SubjectEnum.MATH.enum] = {};
-                            subScorePerSubject[SubjectEnum.VERBAL.enum] = {};
-                            var specificCategoryKeys = Object.keys(allSpecificCategories);
-                            var promArray = [];
-                            var subScoreKeys = ['subScore1Id', 'subScore2Id'];
-
-                            angular.forEach(specificCategoryKeys, function (specificCategoryId) {
-                                var specificCategory = allSpecificCategories[specificCategoryId];
-                                var prom = _getMathOrVerbalSubjectIdIfCategoryNotEssay(specificCategory).then(function (subjectId) {
-                                    if (angular.isDefined(subjectId)) {
-                                        angular.forEach(subScoreKeys, function (subScoreKey) {
-                                            var subScoreId = specificCategory[subScoreKey];
-                                            if (subScoreId !== null && angular.isUndefined(subScorePerSubject[subjectId][subScoreKey])) {
-                                                subScorePerSubject[subjectId][subScoreId] = allSubScores[subScoreId];
-                                            }
-                                        });
-                                    }
-                                });
-                                promArray.push(prom);
-                            });
-
-                            return $q.all(promArray).then(function () {
-                                return subScorePerSubject;
-                            });
-                        });
-                    }
-
-                    return getAllSubjectScoresBySubjectProm;
-                };
-            })();
-
-            this.getSubScoreData = _getSubScoreData;
-        }]);
-})(angular);
 
 angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($templateCache) {
 
@@ -2767,7 +2631,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
     'use strict';
 
     angular.module('znk.infra-sat.performance')
-        .service('PerformanceData', ["$q", "masteryLevel", "StatsSrv", "SubScoreSrv", "SubjectEnum", "TestScoreCategoryEnum", "CategoryService", function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService) {
+        .service('PerformanceData', ["$q", "masteryLevel", "StatsSrv", "SubScoreSrv", "SubjectEnum", "TestScoreCategoryEnum", "CategoryService", "StatsQuerySrv", function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv) {
             'ngInject';
 
             var statsLevelsMap = {
@@ -2776,6 +2640,11 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                 SPECIFIC: 4,
                 GENERAL: 3
             };
+            var SUBJECTS = 'level1Categories';
+            var TESTSCORE = 'level2Categories';
+            var GENERAL_CATEGORYS = 'level3Categories';
+            var SPECIFIC_CATEGORYS = 'level4Categories';
+            var GENERAL_CATEGORY_LEVEL = 3;
 
             function _getSubjectId(parentsIds) {
                 return parentsIds[parentsIds.length - 1];
@@ -2833,12 +2702,12 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                     };
 
                     var mathAndVerbalPerformanceData = {};
-                        mathAndVerbalPerformanceData[SubjectEnum.MATH.enum] =  mathSubjectPerformanceData;
-                        mathAndVerbalPerformanceData[SubjectEnum.VERBAL.enum] =  verbalSubjectPerformanceData;
+                    mathAndVerbalPerformanceData[SubjectEnum.MATH.enum] = mathSubjectPerformanceData;
+                    mathAndVerbalPerformanceData[SubjectEnum.VERBAL.enum] = verbalSubjectPerformanceData;
 
                     var mathAndVerbalSubScoreData = {};
-                        mathAndVerbalSubScoreData [SubjectEnum.MATH.enum] = {};
-                        mathAndVerbalSubScoreData [SubjectEnum.VERBAL.enum] = {};
+                    mathAndVerbalSubScoreData[SubjectEnum.MATH.enum] = {};
+                    mathAndVerbalSubScoreData[SubjectEnum.VERBAL.enum] = {};
 
                     var allProm = [];
                     angular.forEach(specificCategoryStats, function (specificCategory) {
@@ -2848,16 +2717,18 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                             var getSpecificCategorySubScoresProm = SubScoreSrv.getSpecificCategorySubScores(specificCategory.id)
                                 .then(function (subScores) {
                                     angular.forEach(subScores, function (subScore) {
-                                        if (!subScoresData[subScore.id]) {
-                                            subScoresData[subScore.id] = angular.copy(subScore);
-                                            subScoresData[subScore.id].totalQuestions = 0;
-                                            subScoresData[subScore.id].correct = 0;
-                                            subScoresData[subScore.id].totalTime = 0;
-                                        }
+                                        if (subScore) {
+                                            if (!subScoresData[subScore.id]) {
+                                                subScoresData[subScore.id] = angular.copy(subScore);
+                                                subScoresData[subScore.id].totalQuestions = 0;
+                                                subScoresData[subScore.id].correct = 0;
+                                                subScoresData[subScore.id].totalTime = 0;
+                                            }
 
-                                        subScoresData[subScore.id].totalQuestions += specificCategory.totalQuestions;
-                                        subScoresData[subScore.id].correct += specificCategory.correct;
-                                        subScoresData[subScore.id].totalTime += specificCategory.totalTime;
+                                            subScoresData[subScore.id].totalQuestions += specificCategory.totalQuestions;
+                                            subScoresData[subScore.id].correct += specificCategory.correct;
+                                            subScoresData[subScore.id].totalTime += specificCategory.totalTime;
+                                        }
                                     });
                                 });
                             allProm.push(getSpecificCategorySubScoresProm);
@@ -2866,13 +2737,13 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
 
                     return $q.all(allProm).then(function () {
                         angular.forEach(mathAndVerbalSubScoreData, function (subScoresForSubject, subjectId) {
-                            var categoryArray = [];
+                            var subscoreArray = [];
                             angular.forEach(subScoresForSubject, function (subScore) {
                                 var subScorePerformance = _calculateCategoryPerformanceData(subScore);
-                                categoryArray.push(subScorePerformance);
+                                subscoreArray.push(subScorePerformance);
                             });
 
-                            mathAndVerbalPerformanceData[subjectId].categoryArray = categoryArray;
+                            mathAndVerbalPerformanceData[subjectId].subscoreArray = subscoreArray;
                         });
 
                         return mathAndVerbalPerformanceData;
@@ -2890,27 +2761,17 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
 
                     var essayStats = testScoreLevelStats[_getStatsKey(TestScoreCategoryEnum.ESSAY.enum)];
                     var essayGeneralCategoryPerformanceData = _calculateCategoryPerformanceData(essayStats);
-                    essayGeneralCategoryPerformanceData.categoryArray = [];
+                    essayGeneralCategoryPerformanceData.subscoreArray = [];
 
                     angular.forEach(generalCategoryLevelStats, function (generalCategoryStats) {
                         if (_isEssayCategory(generalCategoryStats.parentsIds)) {
                             var generalCategoryPerformance = _calculateCategoryPerformanceData(generalCategoryStats);
-                            essayGeneralCategoryPerformanceData.categoryArray.push(generalCategoryPerformance);
+                            essayGeneralCategoryPerformanceData.subscoreArray.push(generalCategoryPerformance);
                         }
                     });
 
                     return essayGeneralCategoryPerformanceData;
                 });
-            }
-
-            function _extendSubjectPerformance(performanceToExtend, allRelevantCategories) {
-                var generalCategoriesPerformanceArr = performanceToExtend.categoryArray;
-                for (var i = 0; i < generalCategoriesPerformanceArr.length; i++) {
-                    var categoryId = generalCategoriesPerformanceArr[i].categoryId;
-                    delete allRelevantCategories[categoryId];
-                }
-                performanceToExtend.noDataItems = allRelevantCategories;
-                return performanceToExtend;
             }
 
             function _addingNotPracticedSubScores(mathAndVerbalSubScore, allSubScoresBySubject) {
@@ -2922,23 +2783,236 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                 return mathAndVerbalSubScore;
             }
 
+            function _extendSubjectPerformance(performanceToExtend, allRelevantCategories) {
+                var generalCategoriesPerformanceArr = performanceToExtend.subscoreArray;
+                for (var i = 0; i < generalCategoriesPerformanceArr.length; i++) {
+                    var categoryId = generalCategoriesPerformanceArr[i].categoryId;
+                    delete allRelevantCategories[categoryId];
+                }
+                performanceToExtend.noDataItems = allRelevantCategories;
+                return performanceToExtend;
+            }
+
+            function _buildWeakestCategory(subjectsObj, performanceData) {
+                if (!subjectsObj) {
+                    return $q.when(performanceData);
+                }
+
+                var subjectsKeys = Object.keys(subjectsObj);
+                var promArr = [];
+                angular.forEach(subjectsKeys, function (subjectkey) {
+                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(GENERAL_CATEGORY_LEVEL, null, subjectsObj[subjectkey].id);
+                    promArr.push(prom);
+                });
+
+                return $q.all(promArr).then(function (weakestCategoryResults) {
+                    angular.forEach(weakestCategoryResults, function (weakestCategory) {
+                        performanceData[weakestCategory.parentsIds[1]].weakestCategory = {
+                            progress: _getProgressPercentage(weakestCategory.totalQuestions, weakestCategory.correct),
+                            id: weakestCategory.id
+                        };
+                    });
+                    return performanceData;
+                });
+            }
+
+            function _getProgressPercentage(totalQuestions, correctAnswers) {
+                return totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            }
+
+            function _buildTestScore(testScoreObj, performanceData) {
+                if (!testScoreObj) {
+                    return performanceData;
+                }
+
+                var testScoreKeys = Object.keys(testScoreObj);
+                angular.forEach(testScoreKeys, function (testScoreKey) {
+                    var testScoreData = {};
+
+                    testScoreData.levelProgress = _getProgressPercentage(testScoreObj[testScoreKey].totalQuestions, testScoreObj[testScoreKey].correct);
+                    testScoreData.avgTime = _getAvgTime(testScoreObj[testScoreKey].totalQuestions, testScoreObj[testScoreKey].totalTime);
+                    testScoreData.testScoreId = testScoreObj[testScoreKey].id;
+                    testScoreData.generalCategoryArray = [];
+
+                    var subjectId = testScoreObj[testScoreKey].parentsIds[0];
+                    if (angular.isDefined(performanceData[subjectId])) {
+                        if (!performanceData[subjectId].testScoreArray) {
+                            performanceData[subjectId].testScoreArray = [];
+                        }
+                        performanceData[subjectId].testScoreArray.push(testScoreData);
+                    }
+                });
+
+                return performanceData;
+            }
+
+            function _buildGeneralCategories(statsObj, performanceData) {
+                function _setCategoryToCategoryArray(subjectObj, testScoreId, generalCategory) {
+                    if (subjectObj.testScoreArray) {
+                        for (var i = 0; i < subjectObj.testScoreArray.length; i++) {
+                            if (angular.isDefined(subjectObj.testScoreArray[i]) && subjectObj.testScoreArray[i].testScoreId === testScoreId) {
+                                subjectObj.testScoreArray[i].generalCategoryArray.push(generalCategory);
+                            }
+                        }
+                    }
+                }
+
+                if (!statsObj) {
+                    return $q.when(performanceData);
+                }
+                return CategoryService.getCategoryMap().then(function (categoryMap) {
+                    return CategoryService.getAllLevelCategories(3).then(function (generalCategories) {
+                        angular.forEach(generalCategories, function (generalCategory) {
+                            var generalCategoryData = {};
+                            var generalCategoryStats = statsObj['id_' + generalCategory.id];
+                            var SUBJECT_ID, TEST_SCORE_ID;
+                            if (generalCategoryStats) {
+                                SUBJECT_ID = generalCategoryStats.parentsIds[1];
+                                TEST_SCORE_ID = generalCategoryStats.parentsIds[0];
+                                generalCategoryData.levelProgress = _getProgressPercentage(generalCategoryStats.totalQuestions, generalCategoryStats.correct);
+                                generalCategoryData.avgTime = _getAvgTime(generalCategoryStats.totalQuestions, generalCategoryStats.totalTime);
+                                generalCategoryData.id = generalCategoryStats.id;
+                            } else {
+                                TEST_SCORE_ID = categoryMap[generalCategory.id].parentId;
+                                SUBJECT_ID = categoryMap[TEST_SCORE_ID].parentId;
+                                generalCategoryData.levelProgress = undefined;
+                                generalCategoryData.avgTime = undefined;
+                                generalCategoryData.id = generalCategory.id;
+                            }
+
+                            _setCategoryToCategoryArray(performanceData[SUBJECT_ID], TEST_SCORE_ID, generalCategoryData);
+                        });
+
+                        return performanceData;
+                    });
+                });
+            }
+
+            function _buildSpecificCategories(specificObj, performanceData) {
+                return CategoryService.get().then(function (categories) {
+                    angular.forEach(performanceData, function (subject) {
+                        angular.forEach(subject.testScoreArray, function (testscoreCat) {
+                            angular.forEach(testscoreCat.generalCategoryArray, function (generalCat) {
+                                var specificChildrens = categories.filter(function (category) {
+                                    return category.parentId === generalCat.id;
+                                });
+
+                                generalCat.specificCategoryArray = [];
+                                angular.forEach(specificChildrens, function (specificChildren) {
+                                    var specificStatsData = specificObj['id_' + specificChildren.id];
+                                    if (specificStatsData) {
+                                        generalCat.specificCategoryArray.push({
+                                            levelProgress: _getProgressPercentage(specificStatsData.totalQuestions, specificStatsData.correct),
+                                            avgTime: _getAvgTime(specificStatsData.totalQuestions, specificStatsData.totalTime),
+                                            correct: specificStatsData.correct,
+                                            wrong: specificStatsData.wrong,
+                                            totalQuestions: specificStatsData.totalQuestions,
+                                            id: specificStatsData.id
+                                        });
+                                    } else {
+                                        generalCat.specificCategoryArray.push({
+                                            levelProgress: undefined,
+                                            avgTime: undefined,
+                                            correct: undefined,
+                                            wrong: undefined,
+                                            totalQuestions: undefined,
+                                            id: specificChildren.id
+                                        });
+                                    }
+                                });
+                            });
+                        });
+                    });
+                    return performanceData;
+                });
+            }
+
+            function _getAvgTime(totalQuestions, totalTime) {
+                return totalQuestions > 0 ? Math.round((totalTime / 1000) / totalQuestions) : 0;
+            }
+
+            function _calcVerbalAvgMastry(performanceData) {
+                var readingMastry, writingMastry;
+                var readingAvgTime = 0,
+                    writingAvgTime = 0;
+                if (performanceData && performanceData[SubjectEnum.VERBAL.enum]) {
+                    if (performanceData[SubjectEnum.VERBAL.enum].reading) {
+                        readingMastry = performanceData[SubjectEnum.VERBAL.enum].reading.progress;
+                        readingAvgTime = performanceData[SubjectEnum.VERBAL.enum].reading.avgTime;
+                    }
+
+                    if (performanceData[SubjectEnum.VERBAL.enum].writing) {
+                        writingMastry = performanceData[SubjectEnum.VERBAL.enum].writing.progress;
+                        writingAvgTime = performanceData[SubjectEnum.VERBAL.enum].writing.avgTime;
+                    }
+
+                    performanceData[SubjectEnum.VERBAL.enum].progress = (readingMastry + writingMastry) / 2;
+                    performanceData[SubjectEnum.VERBAL.enum].avgTime = (readingAvgTime + writingAvgTime) / 2;
+                }
+            }
+
+            function _calcSubScoreSpecificCategory(_performanceData, allSpecificCategories, specificStats) {
+                angular.forEach(specificStats, function (specificCategoryStats, categoryId) {
+                    categoryId = categoryId.replace('id_', '');
+                    var subjectId = specificCategoryStats.parentsIds[specificCategoryStats.parentsIds.length - 1];
+                    var categorySubScore1 = allSpecificCategories[categoryId].subScore1Id;
+                    var categorySubScore2 = allSpecificCategories[categoryId].subScore2Id;
+
+                    if (angular.isDefined(categorySubScore1) || angular.isDefined(categorySubScore2)) {
+                        angular.forEach(_performanceData[subjectId].subscoreArray, function (subscoreData) {
+                            if (+subscoreData.categoryId === categorySubScore1 || +subscoreData.categoryId === categorySubScore2) {
+                                if (!angular.isArray(subscoreData.specificArray)) {
+                                    subscoreData.specificArray = [];
+                                }
+
+                                subscoreData.specificArray.push({
+                                    id: categoryId,
+                                    name: allSpecificCategories[categoryId].name,
+                                    levelProgress: _getProgressPercentage(specificCategoryStats.totalQuestions, specificCategoryStats.correct),
+                                    correct: specificCategoryStats.correct,
+                                    wrong: specificCategoryStats.wrong,
+                                    totalQuestions: specificCategoryStats.totalQuestions
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
             this.getPerformanceData = function () {
                 return $q.all([
                     _getMathAndVerbalPerformanceData(),
                     _getEssayPerformanceData(),
                     SubScoreSrv.getAllSubScoresBySubject(),
-                    CategoryService.getAllLevel3CategoriesGroupedByLevel1(SubjectEnum.ESSAY.enum)
+                    CategoryService.getAllGeneralCategoriesBySubjectId(SubjectEnum.ESSAY.enum),
+                    CategoryService.getAllLevelCategories(4),
+                    StatsSrv.getStats()
                 ]).then(function (res) {
                     var mathAndVerbalSubScorePerformanceData = res[0];
                     var essayPerformanceData = res[1];
                     var allSubScoresBySubjects = res[2];
                     var allGeneralCategories = angular.copy(res[3]);
+                    var allSpecificCategories = angular.copy(res[4]);
+                    var stats = res[5];
 
                     var performanceData = _addingNotPracticedSubScores(mathAndVerbalSubScorePerformanceData, allSubScoresBySubjects);
                     performanceData[SubjectEnum.ESSAY.enum] = _extendSubjectPerformance(essayPerformanceData, allGeneralCategories);
-                    return performanceData;
+
+                    _calcVerbalAvgMastry(performanceData);
+
+                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[SPECIFIC_CATEGORYS]);
+
+                    return _buildWeakestCategory(stats[SUBJECTS], performanceData).then(function (newPerformanceData) {
+                        performanceData = _buildTestScore(stats[TESTSCORE], newPerformanceData);
+                        return _buildGeneralCategories(stats[GENERAL_CATEGORYS], performanceData).then(function (performanceWithTestScore) {
+                            return _buildSpecificCategories(stats[SPECIFIC_CATEGORYS], performanceWithTestScore).then(function (_performanceData) {
+                                return _performanceData;
+                            });
+                        });
+                    });
                 });
             };
+
         }]);
 })(angular);
 
@@ -3207,7 +3281,7 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
     'use strict';
 
     angular.module('znk.infra-sat.userGoals', [
-        'znk.infra-sat.auth'
+        'znk.infra.auth'
     ]);
 })(angular);
 
