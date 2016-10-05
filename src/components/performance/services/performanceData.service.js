@@ -72,15 +72,13 @@
                         writing: _calculateCategoryPerformanceData(writingStats)
                     };
 
-                    var mathAndVerbalPerformanceData = {
-                        '0': mathSubjectPerformanceData,
-                        '7': verbalSubjectPerformanceData
-                    };
+                    var mathAndVerbalPerformanceData = {};
+                    mathAndVerbalPerformanceData[SubjectEnum.MATH.enum] = mathSubjectPerformanceData;
+                    mathAndVerbalPerformanceData[SubjectEnum.VERBAL.enum] = verbalSubjectPerformanceData;
 
-                    var mathAndVerbalSubScoreData = {
-                        '0': {},
-                        '7': {}
-                    };
+                    var mathAndVerbalSubScoreData = {};
+                    mathAndVerbalSubScoreData[SubjectEnum.MATH.enum] = {};
+                    mathAndVerbalSubScoreData[SubjectEnum.VERBAL.enum] = {};
 
                     var allProm = [];
                     angular.forEach(specificCategoryStats, function (specificCategory) {
