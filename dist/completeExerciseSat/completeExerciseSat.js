@@ -1669,9 +1669,9 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "\n" +
     "<div class=\"question-wrapper writing-question-wrapper question-basic-style\">\n" +
     "\n" +
-    "    <div class=\"question-container znk-scrollbar\"></div>\n" +
+    "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
     "\n" +
-    "    <div class=\"answer-container znk-scrollbar\">\n" +
+    "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"question-content\"></div>\n" +
     "        <answer-builder></answer-builder>\n" +
     "    </div>\n" +
@@ -1706,7 +1706,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/lectureQuestion.template.html",
-    "<div class=\"lecture-question-wrapper\" ng-switch=\"vm.question.typeId\">\n" +
+    "<div class=\"lecture-question-wrapper\" ng-switch=\"vm.question.typeId\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "    <div class=\"img-wrapper\" ng-switch-when=\"1\">\n" +
     "        <img  ng-src=\"{{vm.question.fileUrl}}\">\n" +
     "    </div>\n" +
@@ -1718,9 +1718,9 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "\n" +
     "<div class=\"math-question-wrapper\" image-zoomer>\n" +
     "\n" +
-    "    <div class=\"question-container\"></div>\n" +
+    "    <div class=\"question-container\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
     "\n" +
-    "    <div class=\"answer-container znk-scrollbar\">\n" +
+    "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"answer-content\"></div>\n" +
     "        <custom-answer-builder-sat></custom-answer-builder-sat>\n" +
     "    </div>\n" +
@@ -1746,14 +1746,14 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "\n" +
     "<div class=\"question-wrapper reading-question-wrapper question-basic-style\" image-zoomer>\n" +
     "\n" +
-    "    <div class=\"question-container znk-scrollbar\">\n" +
+    "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "        <div class=\"passage-title\">{{::vm.passageTitle}}</div>\n" +
     "        <div class=\"article\">\n" +
     "            <div class=\"article-content\"></div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
-    "    <div class=\"answer-container znk-scrollbar\">\n" +
+    "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"question-content\"></div>\n" +
     "        <answer-builder></answer-builder>\n" +
     "    </div>\n" +
@@ -1779,7 +1779,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "\n" +
     "<div class=\"question-wrapper simple-question-wrapper question-basic-style\" image-zoomer>\n" +
     "\n" +
-    "        <div class=\"answer-container znk-scrollbar\">\n" +
+    "        <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "            <div class=\"question-content\"></div>\n" +
     "            <custom-answer-builder-sat></custom-answer-builder-sat>\n" +
     "        </div>\n" +
