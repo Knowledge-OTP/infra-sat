@@ -215,19 +215,6 @@
     'use strict';
 
     angular.module('znk.infra-sat.performance')
-        .run(["$timeout", "$translatePartialLoader", function($timeout, $translatePartialLoader){
-            'ngInject';
-
-            $timeout(function(){
-                $translatePartialLoader.addPart('performance');
-            });
-        }]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.performance')
         .service('masteryLevel', ["$filter", function ($filter) {
             'ngInject';
 
