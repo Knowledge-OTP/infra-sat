@@ -1310,19 +1310,6 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .run(["$timeout", "$translatePartialLoader", function($timeout, $translatePartialLoader){
-            'ngInject';
-
-            $timeout(function(){
-                $translatePartialLoader.addPart('completeExerciseSat');
-            });
-        }]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.completeExerciseSat')
         .service('articleSrv',function () {
             'ngInject';
 
@@ -2559,19 +2546,6 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                 return directive;
             }
         );
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.performance')
-        .run(["$timeout", "$translatePartialLoader", function($timeout, $translatePartialLoader){
-            'ngInject';
-
-            $timeout(function(){
-                $translatePartialLoader.addPart('performance');
-            });
-        }]);
 })(angular);
 
 (function (angular) {
