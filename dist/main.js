@@ -1989,32 +1989,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
 
             var decoratedEstimatedScoreSrv = $delegate;
 
-            var getEstimatedScoresFn = $delegate.getEstimatedScores;
-
-            decoratedEstimatedScoreSrv.getEstimatedScores = function () {
-                return $delegate.getLatestEstimatedScore().then(function (latestScores) {
-                    var estimatedScores = {};
-                    angular.forEach(latestScores, function (estimatedScore, subjectId) {
-                        estimatedScores[subjectId] = Math.round(estimatedScore.score) || 0;
-                    });
-                    return estimatedScores;
-                });
-            };
-
-            decoratedEstimatedScoreSrv.getEstimatedScoresData = function () {
-                return getEstimatedScoresFn.apply($delegate).then(function (estimatedScoresData) {
-                    var estimatedScores = {};
-                    angular.forEach(estimatedScoresData, function (estimatedScore, subjectId) {
-                        estimatedScores[subjectId] = [];
-                        angular.forEach(estimatedScore, function (value) {
-                            value.score = Math.round(value.score) || 0;
-                            estimatedScores[subjectId].push(value);
-                        });
-                    });
-                    return estimatedScores;
-                });
-            };
-
             decoratedEstimatedScoreSrv.getCompositeScore = function () {    // todo: delete this fn?
                 return $delegate.getLatestEstimatedScore().then(function (estimatedScores) {
                     var scoresArr = [];
@@ -2385,7 +2359,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                 'ngInject';
 
                 var vm = this;
-                var estimatedScoresDataProm = EstimatedScoreSrv.getEstimatedScoresData();
+                var estimatedScoresDataProm = EstimatedScoreSrv.getEstimatedScores();
                 var getGoalsProm = UserGoalsService.getGoals();
                 var inProgressProm = false;
                 var subjectEnumToValMap = SubjectEnum.getEnumMap();
@@ -3234,7 +3208,8 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function($tem
                         $log.error('SocialSharingSrv getSharingData: points should be configured in config phase!');
                         return $q.when(false);
                     }
-                    return EstimatedScoreSrv.getEstimatedScoresData().then(function (scoresMap) {
+                    return EstimatedScoreSrv.getEstimatedScores().then(function (scoresMap) {
+                        scoresMap = angular.copy(scoresMap);
                         var scoresArr = scoresMap[subjectId];
                         if (!scoresArr) {
                             $log.error('SocialSharingSrv getSharingData: no match of subjectId in scores obj! subjectId: ' + subjectId);
