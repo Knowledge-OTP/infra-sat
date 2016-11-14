@@ -1974,8 +1974,9 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     angular.module('znk.infra-sat.configSat')
         .decorator('EstimatedScoreSrv', ["$delegate", "ScoringService", function ($delegate, ScoringService) {
             'ngInject';
+            var estimatedScoreSrv = $delegate;
 
-            $delegate.getCompositeScore = function () {    // todo: delete this fn?
+            estimatedScoreSrv.getCompositeScore = function () {    // todo: delete this fn?
                 return $delegate.getLatestEstimatedScore().then(function (estimatedScores) {
                     var scoresArr = [];
                     angular.forEach(estimatedScores, function (estimatesScoreForSubject) {
@@ -1985,7 +1986,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
                 });
             };
 
-            return $delegate;
+            return estimatedScoreSrv;
         }]);
 })();
 
