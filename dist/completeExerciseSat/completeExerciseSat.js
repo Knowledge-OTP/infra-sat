@@ -1296,19 +1296,6 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .run(["$timeout", "$translatePartialLoader", function($timeout, $translatePartialLoader){
-            'ngInject';
-
-            $timeout(function(){
-                $translatePartialLoader.addPart('completeExerciseSat');
-            });
-        }]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.completeExerciseSat')
         .service('articleSrv',function () {
             'ngInject';
 
