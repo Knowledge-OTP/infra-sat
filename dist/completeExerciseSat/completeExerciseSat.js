@@ -1512,6 +1512,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "        <performance-timeline\n" +
     "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
     "            subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
+    "            show-induction=\"true\"\n" +
     "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "        </performance-timeline>\n" +
     "    </section>\n" +
