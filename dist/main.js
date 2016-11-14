@@ -1667,8 +1667,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "<answer-builder> </answer-builder>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/essayQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper writing-question-wrapper question-basic-style\">\n" +
     "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
@@ -1716,8 +1714,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/mathQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"math-question-wrapper\" image-zoomer>\n" +
     "\n" +
     "    <div class=\"question-container\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
@@ -1744,8 +1740,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/readingQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper reading-question-wrapper question-basic-style\" image-zoomer>\n" +
     "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
@@ -1777,41 +1771,26 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/simpleQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper simple-question-wrapper question-basic-style\" image-zoomer>\n" +
-    "\n" +
     "        <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "            <div class=\"question-content\"></div>\n" +
     "            <custom-answer-builder-sat></custom-answer-builder-sat>\n" +
     "        </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/writingFullPassage.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper english-full-paragraphs-wrapper question-basic-style\" image-zoomer>\n" +
-    "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "        <div class=\"paragraph-title\"></div>\n" +
-    "\n" +
     "        <div class=\"paragraphs-wrapper\"></div>\n" +
-    "\n" +
     "    </div>\n" +
-    "\n" +
     "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"question-content\"></div>\n" +
     "        <answer-builder></answer-builder>\n" +
     "    </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/writingSpecificParagraph.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper writing-specific-paragraph-wrapper question-basic-style\" translate-namespace=\"WRITING_SPECIFIC_PARAGRAPH\">\n" +
     "\n" +
     "    <div class=\"specific-paragraph-view-wrapper\" ng-show=\"vm.view === vm.SPECIFIC_PARAGRAPH\" image-zoomer>\n" +
@@ -1996,9 +1975,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
         .decorator('EstimatedScoreSrv', ["$delegate", "ScoringService", function ($delegate, ScoringService) {
             'ngInject';
 
-            var decoratedEstimatedScoreSrv = $delegate;
-
-            decoratedEstimatedScoreSrv.getCompositeScore = function () {    // todo: delete this fn?
+            $delegate.getCompositeScore = function () {    // todo: delete this fn?
                 return $delegate.getLatestEstimatedScore().then(function (estimatedScores) {
                     var scoresArr = [];
                     angular.forEach(estimatedScores, function (estimatesScoreForSubject) {
@@ -2008,7 +1985,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
                 });
             };
 
-            return decoratedEstimatedScoreSrv;
+            return $delegate;
         }]);
 })();
 

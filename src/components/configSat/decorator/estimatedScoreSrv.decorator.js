@@ -5,9 +5,7 @@
         .decorator('EstimatedScoreSrv', function ($delegate, ScoringService) {
             'ngInject';
 
-            var decoratedEstimatedScoreSrv = $delegate;
-
-            decoratedEstimatedScoreSrv.getCompositeScore = function () {    // todo: delete this fn?
+            $delegate.getCompositeScore = function () {    // todo: delete this fn?
                 return $delegate.getLatestEstimatedScore().then(function (estimatedScores) {
                     var scoresArr = [];
                     angular.forEach(estimatedScores, function (estimatesScoreForSubject) {
@@ -17,6 +15,6 @@
                 });
             };
 
-            return decoratedEstimatedScoreSrv;
+            return $delegate;
         });
 })();

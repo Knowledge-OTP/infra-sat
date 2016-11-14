@@ -257,11 +257,6 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= yeoman.src %>/components',
-                    src: '*/locale/*.*',
-                    dest: '<%= yeoman.tmp %>'
-                }, {
-                    expand: true,
-                    cwd: '<%= yeoman.src %>/components',
                     src: '*/assets/**/*.*',
                     dest: '<%= yeoman.tmp %>'
                 }, {
