@@ -1,11 +1,11 @@
 {
     "name": "infra-sat",
-    "version": "v1.0.0",
+    "version": "v0.0.2",
     "authors": [
         "Zinkerz"
     ],
     "dependencies": {
-        "infra-web-app": "https://github.com/Knowledge-OTP/infra-web-app.git#v0.0.49"
+        "infra-web-app": "https://github.com/Knowledge-OTP/infra-web-app.git#~v0.0.51"
     },
     "ignore": [
         ".*",
