@@ -1990,6 +1990,23 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
         }]);
 })();
 
+(function () {
+    'use strict';
+
+    angular.module('znk.infra-sat.configSat')
+        .decorator('SubjectEnum', ["$delegate", function ($delegate) {
+            'ngInject';
+
+            var relevantSubjects = ['MATH', 'VERBAL', 'ESSAY'];
+            angular.forEach($delegate, function (value, key) {
+                if (relevantSubjects.indexOf(key) === -1) {
+                    delete $delegate[key];
+                }
+            });
+            return $delegate;
+        }]);
+})();
+
 angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templateCache) {
 
 }]);
