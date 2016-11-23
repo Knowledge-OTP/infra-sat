@@ -329,7 +329,7 @@
 
                     performanceDataProm.then(function (performanceData) {
                         var subScoresKeys = Object.keys(categoryRawMastery);
-                        var subScoresArray = performanceData[subjectId].categoryArray;
+                        var subScoresArray = performanceData[subjectId].subscoresArray;
 
                         angular.forEach(subScoresKeys, function (subScoreKey) {
                             var progress = _getCategoryProgressById(subScoresArray, subScoreKey);
