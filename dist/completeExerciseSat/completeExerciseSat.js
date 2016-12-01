@@ -1349,7 +1349,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
     "        <div class=\"estimated-score-title\">\n" +
-    "            <span translate=\"SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
+    "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
     "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
     "        <performance-timeline\n" +
     "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
