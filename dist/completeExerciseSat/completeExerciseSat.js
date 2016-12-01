@@ -1349,17 +1349,17 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
-    "            <div class=\"estimated-score-title\">\n" +
-    "                <span translate=\"SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
-    "                <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
-    "            <performance-timeline\n" +
-    "                on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
-    "                subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
-    "                show-induction=\"true\"\n" +
-    "                active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
-    "            </performance-timeline>\n" +
-    "        </section>\n" +
-    "\n" +
+    "             \n" +
+    "        <div class=\"estimated-score-title\">\n" +
+    "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
+    "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
+    "        <performance-timeline\n" +
+    "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
+    "            subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
+    "            show-induction=\"true\"\n" +
+    "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
+    "        </performance-timeline>\n" +
+    "    </section>\n" +
     "        <section class=\"proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
     "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
     "            <div class=\"row data-row\">\n" +

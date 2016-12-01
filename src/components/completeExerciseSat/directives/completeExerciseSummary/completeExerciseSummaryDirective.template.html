@@ -83,17 +83,16 @@
                  ng-class="{
                 'seen-summary': $ctrl.seenSummary
              }">
-            <div class="estimated-score-title">
-                <span translate="SUBJECTS.{{$ctrl.exerciseContent.subjectId}}"></span>
-                <span translate=".ESTIMATED_SCORE"></span></div>
-            <performance-timeline
-                on-timeline-finish="$ctrl.onTimelineFinish(subjectDelta)"
-                subject-id="{{::$ctrl.exerciseContent.subjectId}}"
-                show-induction="true"
-                active-exercise-id="::$ctrl.exerciseContent.id">
-            </performance-timeline>
-        </section>
-
+        <div class="estimated-score-title">
+            <span translate="COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}"></span>
+            <span translate=".ESTIMATED_SCORE"></span></div>
+        <performance-timeline
+            on-timeline-finish="$ctrl.onTimelineFinish(subjectDelta)"
+            subject-id="{{::$ctrl.exerciseContent.subjectId}}"
+            show-induction="true"
+            active-exercise-id="::$ctrl.exerciseContent.id">
+        </performance-timeline>
+    </section>
         <section class="proficiency-level-row animate-if" ng-if="$ctrl.notSeenSummary">
             <div class="proficiency-title-row" translate=".MASTERY_LEVEL"></div>
             <div class="row data-row">
