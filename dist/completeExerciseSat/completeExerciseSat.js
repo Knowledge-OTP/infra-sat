@@ -14,6 +14,22 @@
     ]);
 })(angular);
 
+(function (angular) {
+    'use strict';
+    
+    angular.module('znk.infra-sat.completeExerciseSat')
+        .config(["ExerciseCycleSrvProvider", function (ExerciseCycleSrvProvider) {
+            'ngInject';
+            ExerciseCycleSrvProvider.setInvokeFunctions({
+                afterBroadcastFinishExercise: ["completeExerciseSatSrv", function (completeExerciseSatSrv) {
+                    'ngInject';//jshint ignore:line
+                    return function (data) {
+                        return completeExerciseSatSrv.afterBroadcastFinishExercise(data);
+                    };
+                }]
+            });
+        }]);
+})(angular);
 (function () {
     'use strict';
 
@@ -1209,8 +1225,76 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "ExerciseResultSrv", "ExamSrv", function ($q, $log, ExerciseTypeEnum, ExerciseResultSrv, ExamSrv) {
+        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService) {
             'ngInject';
+
+            var self = this;
+
+            function saveSectionScoring(examResult, sectionScoringNum, subjectId) {
+                if (!examResult.scores) {
+                    examResult.scores = {};
+                }
+                if (!examResult.scores.sectionsScore) {
+                    examResult.scores.sectionsScore = {};
+                }
+                examResult.scores.sectionsScore[subjectId] = sectionScoringNum;
+                saveTotalScore(examResult);
+            }
+
+            function saveTotalScore(examResult) {
+                var sectionsScore = examResult.scores.sectionsScore;
+                if (sectionsScore[SubjectEnum.MATH.enum] && sectionsScore[SubjectEnum.VERBAL.enum]) {
+                    examResult.scores.totalScore = sectionsScore[SubjectEnum.MATH.enum] + sectionsScore[SubjectEnum.VERBAL.enum];
+                }
+            }
+
+            function saveTestScoring(examResult, testScoringNum, categoryId) {
+                if (!examResult.scores) {
+                    examResult.scores = {};
+                }
+                if (!examResult.scores.testsScore) {
+                    examResult.scores.testsScore = {};
+                }
+                examResult.scores.testsScore[categoryId] = testScoringNum;
+            }
+
+            function prepareDataForExerciseFinish(data) {
+                var examId = data.exerciseParentContent.id;
+                return ExerciseResultSrv.getExamResult(examId).then(function (examResult) {
+                    var examData = data.exerciseParentContent;
+                    var exercise = data.exerciseContent;
+                    var exerciseResult = data.exerciseResult;
+
+                    var mergedTestScoresIfCompletedProm = self.mergedTestScoresIfCompleted(examData, examResult, exercise, exerciseResult);
+
+                    return mergedTestScoresIfCompletedProm.then(function (mergeSectionData) {
+                        var proms = {
+                            newExerciseData: mergeSectionData,
+                            exercise: exercise,
+                            examResult: examResult
+                        };
+                        var scoringSectionProm;
+                        var scoringTestProm;
+                        var questionResults;
+                        if (mergeSectionData) {
+                            questionResults = mergeSectionData.resultsData.questionResults;
+                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exercise.subjectId);
+                            proms.sectionScoring = scoringSectionProm;
+                            // if math - testScoring is calculated per section and not per test
+                            if (exercise.subjectId === SubjectEnum.MATH.enum) {
+                                scoringTestProm = ScoringService.getTestScoreResult(questionResults, examData.typeId, exercise.categoryId);
+                                proms.testScoring = scoringTestProm;
+                            }
+                        }
+                        // if not math - testScoring is calculated per test
+                        if (exercise.subjectId !== SubjectEnum.MATH.enum) {
+                            scoringTestProm = ScoringService.getTestScoreResult(exerciseResult.questionResults, examData.typeId, exercise.categoryId);
+                            proms.testScoring = scoringTestProm;
+                        }
+                        return $q.all(proms);
+                    });
+                });
+            }
 
             this.mergedTestScoresIfCompleted = function (exam, examResult, questionsData, resultsData) {
                 if (!exam || !questionsData || !resultsData || !examResult) {
@@ -1258,6 +1342,23 @@
                         resultsData: resultsData
                     };
                 });
+            };
+
+            this.afterBroadcastFinishExercise = function (data) {
+                var isSection = data.exerciseDetails.exerciseTypeId === ExerciseTypeEnum.SECTION.enum;
+                var isEssay = data.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                // only if it's section and not essay, save score!
+                if (isSection && !isEssay) {
+                    prepareDataForExerciseFinish(data).then(function (result) {
+                        if (result.sectionScoring) {
+                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, result.exercise.subjectId);
+                        }
+                        if (result.testScoring) {
+                            saveTestScoring(result.examResult, result.testScoring.testScore, result.exercise.categoryId);
+                        }
+                        result.examResult.$save();
+                    });
+                }
             };
         }]);
 })(angular);
@@ -1349,7 +1450,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
-    "             \n" +
     "        <div class=\"estimated-score-title\">\n" +
     "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
     "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
