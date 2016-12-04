@@ -1363,7 +1363,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
-    "             \n" +
     "        <div class=\"estimated-score-title\">\n" +
     "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
     "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
@@ -2168,6 +2167,8 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($tem
             })();
 
             this.getSubScoreData = _getSubScoreData;
+
+            this.getSubScoreCategory = _getSubScoreCategoryData;
         }]);
 })(angular);
 
