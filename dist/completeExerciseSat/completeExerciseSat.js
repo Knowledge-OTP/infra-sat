@@ -30,14 +30,6 @@
             });
         }]);
 })(angular);
-
-
-
-
-
-
-
-
 (function () {
     'use strict';
 

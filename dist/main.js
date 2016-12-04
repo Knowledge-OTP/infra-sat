@@ -44,14 +44,6 @@
             });
         }]);
 })(angular);
-
-
-
-
-
-
-
-
 (function () {
     'use strict';
 
