@@ -1451,6 +1451,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            </div>\n" +
     "            <div class=\"review-btn-wrapper\">\n" +
     "                <md-button class=\"md-primary znk\"\n" +
+    "                           aria-label=\"{{'COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.REVIEW' | translate}}\"\n" +
     "                           autofocus\n" +
     "                           tabindex=\"1\"\n" +
     "                           md-no-ink\n" +
