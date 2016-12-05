@@ -171,7 +171,8 @@ free-text-answer .free-text-answer-wrapper {
   free-text-answer .free-text-answer-wrapper .wrong .user-answer {
     color: #ff6766; }
   free-text-answer .free-text-answer-wrapper .correct svg-icon.correct-icon {
-    display: block; }
+    display: block;
+    margin-left: 10px; }
     free-text-answer .free-text-answer-wrapper .correct svg-icon.correct-icon svg {
       width: 26px;
       height: auto; }
