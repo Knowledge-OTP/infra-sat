@@ -106,6 +106,8 @@
             })();
 
             this.getSubScoreData = _getSubScoreData;
+
+            this.getSubScoreCategory = _getSubScoreCategoryData;
         }]);
 })(angular);
 

@@ -2268,6 +2268,8 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($tem
             })();
 
             this.getSubScoreData = _getSubScoreData;
+
+            this.getSubScoreCategory = _getSubScoreCategoryData;
         }]);
 })(angular);
 
