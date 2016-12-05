@@ -1616,7 +1616,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "    <div ng-switch-when=\"true\" class=\"answer-status-wrapper\" ng-class=\"userAnswerStatus\">\n" +
     "        <div class=\"answer-status\">\n" +
     "            <div class=\"user-answer\">{{d.userAnswer}}</div>\n" +
-    "            <svg-icon class=\"correct-icon\" name=\"complete-exercise-correct-icon\"></svg-icon>\n" +
     "            <svg-icon class=\"wrong-icon\" name=\"complete-exercise-wrong-icon\"></svg-icon>\n" +
     "        </div>\n" +
     "        <div class=\"correct-answer\">\n" +
