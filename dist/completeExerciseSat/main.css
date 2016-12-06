@@ -529,54 +529,12 @@ znk-exercise .question-basic-style img.img-to-zoom {
   cursor: pointer;
   vertical-align: middle; }
 
-znk-exercise .question-basic-style .zoom-icon-wrapper {
-  width: 35px;
-  height: 35px;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-pack: center;
-      justify-content: center;
-  -ms-flex-align: center;
-      align-items: center;
-  text-align: center;
-  cursor: pointer;
-  background-color: #a6cfd4;
-  position: absolute;
-  bottom: 0;
-  right: 0; }
-  znk-exercise .question-basic-style .zoom-icon-wrapper svg-icon {
-    width: 21px;
-    height: 21px; }
-    znk-exercise .question-basic-style .zoom-icon-wrapper svg-icon svg line, znk-exercise .question-basic-style .zoom-icon-wrapper svg-icon svg polyline {
-      stroke: #ffffff;
-      stroke-width: 15px; }
-  znk-exercise .question-basic-style .zoom-icon-wrapper:hover {
-    background-color: #89ABAF; }
-
-znk-exercise.done-btn-show .question-container > div:last-child, znk-exercise.done-btn-show .question-container > article:last-child, znk-exercise.done-btn-show .question-container > p:last-child, znk-exercise.pager-displayed .question-container > div:last-child, znk-exercise.pager-displayed .question-container > article:last-child, znk-exercise.pager-displayed .question-container > p:last-child {
-  padding-bottom: 58px; }
-
-znk-exercise.done-btn-show answer-builder, znk-exercise.pager-displayed answer-builder {
-  padding-bottom: 58px; }
-
 znk-exercise .orange-square {
   background-color: #ff931e;
   color: white;
   font-size: 14px;
   text-align: center;
   padding: 0 3px; }
-
-.zoom-image-modal {
-  position: relative; }
-  .zoom-image-modal .close-popup {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    position: absolute;
-    right: -45px;
-    top: -35px; }
-  .zoom-image-modal md-dialog {
-    max-width: 100%; }
 
 znk-exercise simple-question .simple-question-wrapper {
   padding-top: 33px; }
@@ -706,9 +664,6 @@ writing-specific-paragraph {
           font-size: 14px;
           text-align: center;
           padding: 0 3px; }
-
-znk-exercise.done-btn-show .full-passage > div:last-child, znk-exercise.done-btn-show .full-passage > article:last-child, znk-exercise.done-btn-show .full-passage > p:last-child, znk-exercise.pager-displayed .full-passage > div:last-child, znk-exercise.pager-displayed .full-passage > article:last-child, znk-exercise.pager-displayed .full-passage > p:last-child {
-  padding-bottom: 58px; }
 
 znk-exercise .swiper-container {
   box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.27);
