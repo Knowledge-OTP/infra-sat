@@ -553,12 +553,6 @@ znk-exercise .question-basic-style .zoom-icon-wrapper {
   znk-exercise .question-basic-style .zoom-icon-wrapper:hover {
     background-color: #89ABAF; }
 
-znk-exercise.done-btn-show .question-container > div:last-child, znk-exercise.done-btn-show .question-container > article:last-child, znk-exercise.done-btn-show .question-container > p:last-child, znk-exercise.pager-displayed .question-container > div:last-child, znk-exercise.pager-displayed .question-container > article:last-child, znk-exercise.pager-displayed .question-container > p:last-child {
-  padding-bottom: 58px; }
-
-znk-exercise.done-btn-show answer-builder, znk-exercise.pager-displayed answer-builder {
-  padding-bottom: 58px; }
-
 znk-exercise .orange-square {
   background-color: #ff931e;
   color: white;
@@ -706,9 +700,6 @@ writing-specific-paragraph {
           font-size: 14px;
           text-align: center;
           padding: 0 3px; }
-
-znk-exercise.done-btn-show .full-passage > div:last-child, znk-exercise.done-btn-show .full-passage > article:last-child, znk-exercise.done-btn-show .full-passage > p:last-child, znk-exercise.pager-displayed .full-passage > div:last-child, znk-exercise.pager-displayed .full-passage > article:last-child, znk-exercise.pager-displayed .full-passage > p:last-child {
-  padding-bottom: 58px; }
 
 znk-exercise .swiper-container {
   box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.27);

@@ -44,19 +44,6 @@ znk-exercise {
         }
     }
 
-    &.done-btn-show, &.pager-displayed {
-        $bottomShadowHeight: 58px;
-        .question-container {
-            & > div:last-child, & > article:last-child, & > p:last-child {
-                padding-bottom: $bottomShadowHeight;
-            }
-        }
-
-        answer-builder {
-            padding-bottom: $bottomShadowHeight;
-        }
-    }
-
     .orange-square {
         background-color: #ff931e;
         color: white;
