@@ -1462,6 +1462,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            </div>\n" +
     "        </section>\n" +
     "        <section class=\"time-line-wrapper2\"\n" +
+    "                 ng-if=\"!$ctrl.isEssaySubject\"\n" +
     "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
