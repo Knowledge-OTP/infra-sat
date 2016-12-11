@@ -1724,13 +1724,13 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "<div class=\"question-wrapper writing-specific-paragraph-wrapper question-basic-style\" translate-namespace=\"WRITING_SPECIFIC_PARAGRAPH\">\n" +
     "\n" +
     "    <div class=\"specific-paragraph-view-wrapper\" ng-show=\"vm.view === vm.SPECIFIC_PARAGRAPH\" image-zoomer>\n" +
-    "        <div class=\"question-container znk-scrollbar\">\n" +
+    "        <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "            <div class=\"full-passage-link\" ng-bind-html=\"vm.question.groupData.name\" ng-click=\"vm.view = vm.FULL_PASSAGE\"></div>\n" +
     "            <div class=\"paragraph-title\"></div>\n" +
     "            <div class=\"paragraph\"></div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"answer-container znk-scrollbar\">\n" +
+    "        <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "            <div class=\"question-content\"></div>\n" +
     "            <answer-builder></answer-builder>\n" +
     "        </div>\n" +
