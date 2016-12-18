@@ -1807,14 +1807,14 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "\n" +
     "<div class=\"question-wrapper english-full-paragraphs-wrapper question-basic-style\" image-zoomer>\n" +
     "\n" +
-    "    <div class=\"question-container znk-scrollbar\">\n" +
+    "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "        <div class=\"paragraph-title\"></div>\n" +
     "\n" +
     "        <div class=\"paragraphs-wrapper\"></div>\n" +
     "\n" +
     "    </div>\n" +
     "\n" +
-    "    <div class=\"answer-container znk-scrollbar\">\n" +
+    "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"question-content\"></div>\n" +
     "        <answer-builder></answer-builder>\n" +
     "    </div>\n" +
