@@ -14,6 +14,22 @@
     ]);
 })(angular);
 
+(function (angular) {
+    'use strict';
+    
+    angular.module('znk.infra-sat.completeExerciseSat')
+        .config(["ExerciseCycleSrvProvider", function (ExerciseCycleSrvProvider) {
+            'ngInject';
+            ExerciseCycleSrvProvider.setInvokeFunctions({
+                afterBroadcastFinishExercise: ["completeExerciseSatSrv", function (completeExerciseSatSrv) {
+                    'ngInject';//jshint ignore:line
+                    return function (data) {
+                        return completeExerciseSatSrv.afterBroadcastFinishExercise(data);
+                    };
+                }]
+            });
+        }]);
+})(angular);
 (function () {
     'use strict';
 
@@ -329,7 +345,7 @@
 
                     performanceDataProm.then(function (performanceData) {
                         var subScoresKeys = Object.keys(categoryRawMastery);
-                        var subScoresArray = performanceData[subjectId].categoryArray;
+                        var subScoresArray = performanceData[subjectId].subscoreArray;
 
                         angular.forEach(subScoresKeys, function (subScoreKey) {
                             var progress = _getCategoryProgressById(subScoresArray, subScoreKey);
@@ -371,7 +387,7 @@
                     var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
                     var _questions = exerciseContent .questions;
                     var promArr;
-                    if (exerciseContent .subjectId !== SubjectEnum.ESSAY.enum) {
+                    if (exerciseContent.subjectId !== SubjectEnum.ESSAY.enum) {
                         promArr = _setSubScoreMastery(_questions);
                     } else {
                         promArr = _setGeneralMastery(_questions);
@@ -583,138 +599,6 @@
                     ngModelCtrl.$render();
                 }
             };
-        }]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.completeExerciseSat')
-        .directive('imageZoomer', ["$timeout", "$mdDialog", "$document", "$compile", function ($timeout, $mdDialog, $document, $compile) {
-            'ngInject';
-
-            function compileFn() {
-                function preFn(scope, element) {
-                    var MAX_WIDTH = 400;
-                    var MAX_HEIGHT = 500;
-                    var MIN_SIZE_TO_ZOOM = 200;
-                    var zoomableImgElemArr = [];
-
-                    $timeout(function () {
-                        var imageElements = element[0].querySelectorAll('img');
-
-                        angular.forEach(imageElements, function (imgElement) {
-                            var clickableIconElement = addIconToImage(imgElement);
-                            var clickableImageElement = imgElement;
-                            addImageHandler(clickableIconElement, imgElement);  // clickable icon
-                            addImageHandler(clickableImageElement, imgElement); // clickable image
-                        });
-                    });
-
-
-                    function addImageHandler(imgElement, image) {
-                        if (_shouldImageBeZoomed(image)) {
-                            return;
-                        }
-                        if (_getImageWidth(image) > 400) {
-                            image.style.width = MAX_WIDTH + 'px';
-                            image.style.height = 'auto';
-                        }
-                        image.className = 'img-to-zoom';
-                        angular.element(imgElement).on('click', function () {
-                            zoomImage(image);
-                        });
-                        zoomableImgElemArr.push(imgElement);
-                    }
-
-                    function zoomImage(image) {
-                        DialogController.$inject = ["$scope"];
-                        function DialogController($scope) {
-                            $scope.closeDialog = function () {
-                                $mdDialog.hide();
-                            };
-                        }
-
-                        var parentEl = angular.element($document.body);
-                        $mdDialog.show({
-                            clickOutsideToClose: true,
-                            parent: parentEl,
-                            template: '<div class="zoom-image-modal">' +
-                            '<svg-icon ng-click="closeDialog()" name="close-popup"></svg-icon>' +
-                            '<md-dialog ng-click="closeDialog()">' +
-                            '<md-dialog-content>' +
-                            '<img src="' + image.src + '" style="width:' + image.width * 2 + 'px; ' + 'height:' + image.height * 2 + 'px">' +
-                            '</md-dialog-content>' +
-                            '</md-dialog>' +
-                            '</div>',
-                            controller: DialogController
-                        });
-                    }
-
-                    function addIconToImage(image) {
-                        if (_shouldImageBeZoomed(image)) {
-                            return image;
-                        }
-
-                        if (_getImageWidth(image) > MAX_WIDTH) {
-                            image.style.width = MAX_WIDTH + 'px';
-                            image.style.height = 'auto';
-                        }
-                        var imageParent = angular.element(image.parentNode);
-                        var imageNewParent = angular.element('<div class="zoomable-image-with-icon"></div>');   // wrap img and icon with one div element
-                        imageNewParent.css('position', 'relative');
-                        imageNewParent.css('margin', '0 auto');
-                        imageNewParent.css('textAlign', 'center');
-                        imageNewParent.css('width', image.style.width);
-                        imageNewParent.css('height', image.style.height);
-                        imageNewParent.append(image);
-                        imageParent.append(imageNewParent);
-
-                        var svgIconTemplate = '<div class="zoom-icon-wrapper">' +
-                            '<svg-icon name="full-screen-icon"></svg-icon>' +
-                            '</div>';
-
-                        imageNewParent.append(svgIconTemplate);
-                        var iconElement = imageNewParent[0].querySelector('.zoom-icon-wrapper');
-                        $compile(iconElement)(scope);
-                        return iconElement;
-                    }
-
-                    function _shouldImageBeZoomed(image) {
-                        return image.style.width === null || _getImageWidth(image) < MIN_SIZE_TO_ZOOM || _getImageHeight(image) < MIN_SIZE_TO_ZOOM || _getImageHeight(image) > MAX_HEIGHT;
-                    }
-
-                    function _getImageWidth(image) {
-                        return + image.style.width.replace('px', '');
-                    }
-
-                    function _getImageHeight(image) {
-                        var width = _getImageWidth(image);
-                        var height = +image.style.height.replace('px', '');
-                        return width > MAX_WIDTH ? (height * MAX_WIDTH) / width : height;
-                    }
-
-                    scope.$on('$destroy', function () {
-                        for (var i = 0; i < zoomableImgElemArr.length; i++) {
-                            angular.element(zoomableImgElemArr[i]).off('click');
-                        }
-                        zoomableImgElemArr = [];
-                    });
-                }
-
-                return {
-                    post: preFn
-                };
-            }
-
-            var directive = {
-                priority: -1000,
-                restrict: 'A',
-                scope: {},
-                compile: compileFn
-            };
-
-            return directive;
         }]);
 })(angular);
 
@@ -1104,69 +988,43 @@
                     }
                 }
 
-                SocialSharingSrv.getSharingData(self.subjectId).then(function (sharingData) {
+          SocialSharingSrv.getSharingData(self.subjectId).then(function (sharingData) {
                     self.showSocialArea = sharingData;
 
                     if (sharingData) {
                         self.subjectName = subjectMap[self.subjectId];
-                        var image = $window.location.protocol + ENV.zinkerzWebsiteBaseUrl + 'wp-content/themes/salient-child/images/share/' + sharingData.shareUrlMap[self.subjectName];
+                        var image = $window.location.protocol + ENV.zinkerzWebsiteBaseUrl + 'images/share/' + sharingData.shareUrlMap[self.subjectName];
                         var descriptionTranslate = sharingData.isImproved ? 'IMPROVED_TEXT' : 'SHARE_DESCRIPTION';
-                        var description = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.' + descriptionTranslate, {
-                            pts: sharingData.points,
-                            subjectName: self.subjectName
-                        });
+                        var description = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.' + descriptionTranslate, { pts: sharingData.points, subjectName: self.subjectName });
                         var title = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_TITLE');
                         var caption = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_CAPTION');
-                        var url = ENV.zinkezWebsiteUrl;
-                        var ogPrefix = 'og:';
-                        var twitterPrefix = 'twitter:';
+                        var hashtags = translateFilter('SOCIAL_SHARING_CONTAINER_DRV.SHARE_HASHTAGS');
+                        var shareUrl =  $window.location.protocol + ENV.zinkezWebsiteUrl;
 
-
-                        self.shareData = {
-                            facebook: {
-                                type: 'facebook',
-                                facebookurl: url,
-                                facebooktitle: title
-                            }
+                        self.shareData = {};                        
+                        self.shareData.facebook = {
+                            type: 'facebook',
+                            display: 'popup',
+                            link: shareUrl,
+                            picture: image,
+                            caption: caption,
+                            description: description,
+                            app_id: ENV.facebookAppId,
+                            name: title
                         };
-                        self.shareData.facebook[ogPrefix + 'image'] = image;
-                        self.shareData.facebook[ogPrefix + 'image:width'] = 484;
-                        self.shareData.facebook[ogPrefix + 'image:height'] = 252;
-                        self.shareData.facebook[ogPrefix + 'title'] = title;
-                        self.shareData.facebook[ogPrefix + 'caption'] = caption;
-                        self.shareData.facebook[ogPrefix + 'description'] = description;
-                        self.shareData.facebook['fb:app_id'] = ENV.facebookAppId;
 
                         self.shareData.google = {
-                            type: 'google',
-                            url: url,
-                            title: title,
-                            description: description,
-                            image: image
+                            url: shareUrl,
                         };
-
-
-                        self.shareData.google [ogPrefix + 'image'] = image;
-                        self.shareData.google [ogPrefix + 'image:width'] = 484;
-                        self.shareData.google [ogPrefix + 'image:height'] = 252;
-                        self.shareData.google [ogPrefix + 'title'] = title;
-                        self.shareData.google [ogPrefix + 'description'] = description;
-                        self.shareData.google [ogPrefix + 'url'] = url;
 
                         self.shareData.twitter = {
                             type: 'twitter',
-                            description: description,
-                            url: url,
-                            title: title
+                            url: shareUrl,
+                            text: description,
+                            hashtags: hashtags
                         };
-                        self.shareData.twitter[twitterPrefix + 'card'] = 'summary_large_image';
-                        self.shareData.twitter[twitterPrefix + 'description'] = description;
-                        self.shareData.twitter[twitterPrefix + 'site'] = '@oded300';
-                        self.shareData.twitter[twitterPrefix + 'title'] = title;
-                        self.shareData.twitter[twitterPrefix + 'image'] = image;
-                        self.shareData.twitter[twitterPrefix + 'url'] = url;
                     }
-                });
+                });                
             }]);
 })(angular);
 
@@ -1296,19 +1154,6 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .run(["$timeout", "$translatePartialLoader", function($timeout, $translatePartialLoader){
-            'ngInject';
-
-            $timeout(function(){
-                $translatePartialLoader.addPart('completeExerciseSat');
-            });
-        }]);
-})(angular);
-
-(function (angular) {
-    'use strict';
-
-    angular.module('znk.infra-sat.completeExerciseSat')
         .service('articleSrv',function () {
             'ngInject';
 
@@ -1380,8 +1225,76 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "ExerciseResultSrv", "ExamSrv", function ($q, $log, ExerciseTypeEnum, ExerciseResultSrv, ExamSrv) {
+        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService) {
             'ngInject';
+
+            var self = this;
+
+            function saveSectionScoring(examResult, sectionScoringNum, subjectId) {
+                if (!examResult.scores) {
+                    examResult.scores = {};
+                }
+                if (!examResult.scores.sectionsScore) {
+                    examResult.scores.sectionsScore = {};
+                }
+                examResult.scores.sectionsScore[subjectId] = sectionScoringNum;
+                saveTotalScore(examResult);
+            }
+
+            function saveTotalScore(examResult) {
+                var sectionsScore = examResult.scores.sectionsScore;
+                if (sectionsScore[SubjectEnum.MATH.enum] && sectionsScore[SubjectEnum.VERBAL.enum]) {
+                    examResult.scores.totalScore = sectionsScore[SubjectEnum.MATH.enum] + sectionsScore[SubjectEnum.VERBAL.enum];
+                }
+            }
+
+            function saveTestScoring(examResult, testScoringNum, categoryId) {
+                if (!examResult.scores) {
+                    examResult.scores = {};
+                }
+                if (!examResult.scores.testsScore) {
+                    examResult.scores.testsScore = {};
+                }
+                examResult.scores.testsScore[categoryId] = testScoringNum;
+            }
+
+            function prepareDataForExerciseFinish(data) {
+                var examId = data.exerciseParentContent.id;
+                return ExerciseResultSrv.getExamResult(examId).then(function (examResult) {
+                    var examData = data.exerciseParentContent;
+                    var exercise = data.exerciseContent;
+                    var exerciseResult = data.exerciseResult;
+
+                    var mergedTestScoresIfCompletedProm = self.mergedTestScoresIfCompleted(examData, examResult, exercise, exerciseResult);
+
+                    return mergedTestScoresIfCompletedProm.then(function (mergeSectionData) {
+                        var proms = {
+                            newExerciseData: mergeSectionData,
+                            exercise: exercise,
+                            examResult: examResult
+                        };
+                        var scoringSectionProm;
+                        var scoringTestProm;
+                        var questionResults;
+                        if (mergeSectionData) {
+                            questionResults = mergeSectionData.resultsData.questionResults;
+                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exercise.subjectId);
+                            proms.sectionScoring = scoringSectionProm;
+                            // if math - testScoring is calculated per section and not per test
+                            if (exercise.subjectId === SubjectEnum.MATH.enum) {
+                                scoringTestProm = ScoringService.getTestScoreResult(questionResults, examData.typeId, exercise.categoryId);
+                                proms.testScoring = scoringTestProm;
+                            }
+                        }
+                        // if not math - testScoring is calculated per test
+                        if (exercise.subjectId !== SubjectEnum.MATH.enum) {
+                            scoringTestProm = ScoringService.getTestScoreResult(exerciseResult.questionResults, examData.typeId, exercise.categoryId);
+                            proms.testScoring = scoringTestProm;
+                        }
+                        return $q.all(proms);
+                    });
+                });
+            }
 
             this.mergedTestScoresIfCompleted = function (exam, examResult, questionsData, resultsData) {
                 if (!exam || !questionsData || !resultsData || !examResult) {
@@ -1430,6 +1343,23 @@
                     };
                 });
             };
+
+            this.afterBroadcastFinishExercise = function (data) {
+                var isSection = data.exerciseDetails.exerciseTypeId === ExerciseTypeEnum.SECTION.enum;
+                var isEssay = data.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                // only if it's section and not essay, save score!
+                if (isSection && !isEssay) {
+                    prepareDataForExerciseFinish(data).then(function (result) {
+                        if (result.sectionScoring) {
+                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, result.exercise.subjectId);
+                        }
+                        if (result.testScoring) {
+                            saveTestScoring(result.examResult, result.testScoring.testScore, result.exercise.categoryId);
+                        }
+                        result.examResult.$save();
+                    });
+                }
+            };
         }]);
 })(angular);
 
@@ -1442,130 +1372,134 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "        'workout-summary-wrapper-essay': $ctrl.isEssaySubject\n" +
     "     }\">\n" +
     "    <complete-exercise-header></complete-exercise-header>\n" +
-    "    <social-sharing\n" +
-    "        subject-id=\"::$ctrl.exerciseContent.subjectId\"\n" +
-    "        animate=\"true\">\n" +
-    "    </social-sharing>\n" +
-    "    <section>\n" +
-    "        <div class=\"test-score-title\">{{::$ctrl.testScoreTitle}}</div>\n" +
-    "        <div class=\"gauge-row-wrapper\">\n" +
-    "            <div class=\"overflowWrap\">\n" +
-    "                <div class=\"gauge-wrap\">\n" +
-    "                    <div class=\"gauge-inner-text\">{{::$ctrl.performanceChart.successRate}}%\n" +
-    "                        <div class=\"success-title\" translate=\".SUCCESS\"></div>\n" +
+    "    <div class=\"complete-exercise-summary-wrapper\">\n" +
+    "        <social-sharing\n" +
+    "            subject-id=\"::$ctrl.exerciseContent.subjectId\"\n" +
+    "            animate=\"true\">\n" +
+    "        </social-sharing>\n" +
+    "        <section>\n" +
+    "            <div class=\"test-score-title\">{{::$ctrl.testScoreTitle}}</div>\n" +
+    "            <div class=\"gauge-row-wrapper\">\n" +
+    "                <div class=\"overflowWrap\">\n" +
+    "                    <div class=\"gauge-wrap\">\n" +
+    "                        <div class=\"gauge-inner-text\">{{::$ctrl.performanceChart.successRate}}%\n" +
+    "                            <div class=\"success-title\" translate=\".SUCCESS\"></div>\n" +
+    "                        </div>\n" +
+    "                        <canvas width=\"134\"\n" +
+    "                                height=\"134\"\n" +
+    "                                id=\"doughnut\"\n" +
+    "                                class=\"chart chart-doughnut\"\n" +
+    "                                chart-options=\"$ctrl.performanceChart.gaugeSettings.options\"\n" +
+    "                                chart-colours=\"$ctrl.performanceChart.gaugeSettings.colours\"\n" +
+    "                                chart-data=\"$ctrl.performanceChart.gaugeSettings.data\"\n" +
+    "                                chart-labels=\"$ctrl.performanceChart.gaugeSettings.labels\"\n" +
+    "                                chart-legend=\"false\">\n" +
+    "                        </canvas>\n" +
     "                    </div>\n" +
-    "                    <canvas width=\"134\"\n" +
-    "                            height=\"134\"\n" +
-    "                            id=\"doughnut\"\n" +
-    "                            class=\"chart chart-doughnut\"\n" +
-    "                            chart-options=\"$ctrl.performanceChart.gaugeSettings.options\"\n" +
-    "                            chart-colours=\"$ctrl.performanceChart.gaugeSettings.colours\"\n" +
-    "                            chart-data=\"$ctrl.performanceChart.gaugeSettings.data\"\n" +
-    "                            chart-labels=\"$ctrl.performanceChart.gaugeSettings.labels\"\n" +
-    "                            chart-legend=\"false\">\n" +
-    "                    </canvas>\n" +
-    "                </div>\n" +
-    "                <div class=\"statistics\">\n" +
-    "                    <div class=\"stat-row\">\n" +
-    "                        <div class=\"stat-val correct\">{{::$ctrl.exerciseResult.correctAnswersNum}}</div>\n" +
-    "                        <div class=\"title\" translate=\".CORRECT\"></div>\n" +
-    "                        <div class=\"avg-score\">\n" +
+    "                    <div class=\"statistics\">\n" +
+    "                        <div class=\"stat-row\">\n" +
+    "                            <div class=\"stat-val correct\">{{::$ctrl.exerciseResult.correctAnswersNum}}</div>\n" +
+    "                            <div class=\"title\" translate=\".CORRECT\"></div>\n" +
+    "                            <div class=\"avg-score\">\n" +
     "                            <span translate=\".AVG_TIME\"\n" +
     "                                  translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.correctAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"stat-row\">\n" +
-    "                        <div class=\"stat-val wrong\">{{::$ctrl.exerciseResult.wrongAnswersNum}}</div>\n" +
-    "                        <div class=\"title\" translate=\".WRONG\"></div>\n" +
-    "                        <div class=\"avg-score\">\n" +
+    "                        <div class=\"stat-row\">\n" +
+    "                            <div class=\"stat-val wrong\">{{::$ctrl.exerciseResult.wrongAnswersNum}}</div>\n" +
+    "                            <div class=\"title\" translate=\".WRONG\"></div>\n" +
+    "                            <div class=\"avg-score\">\n" +
     "                            <span translate=\".AVG_TIME\"\n" +
     "                                  translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.wrongAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"stat-row\">\n" +
-    "                        <div class=\"stat-val skipped\">{{::$ctrl.exerciseResult.skippedAnswersNum}}</div>\n" +
-    "                        <div class=\"title\" translate=\".SKIPPED\"></div>\n" +
-    "                        <div class=\"avg-score\">\n" +
+    "                        <div class=\"stat-row\">\n" +
+    "                            <div class=\"stat-val skipped\">{{::$ctrl.exerciseResult.skippedAnswersNum}}</div>\n" +
+    "                            <div class=\"title\" translate=\".SKIPPED\"></div>\n" +
+    "                            <div class=\"avg-score\">\n" +
     "                            <span translate=\".AVG_TIME\"\n" +
     "                                  translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.skippedAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"category-name\">{{$ctrl.categoryName | cutString: 42}}</div>\n" +
-    "        </div>\n" +
-    "        <div class=\"review-btn-wrapper\">\n" +
-    "            <md-button class=\"md-primary znk\"\n" +
-    "                       autofocus\n" +
-    "                       tabindex=\"1\"\n" +
-    "                       md-no-ink\n" +
-    "                       ng-cloak\n" +
-    "                       ng-click=\"$ctrl.goToSummary()\">\n" +
-    "                <span translate=\".REVIEW\"></span>\n" +
-    "            </md-button>\n" +
-    "        </div>\n" +
-    "    </section>\n" +
-    "    <section class=\"time-line-wrapper2\"\n" +
-    "             ng-class=\"{\n" +
+    "                <div class=\"category-name\">{{$ctrl.categoryName | cutString: 42}}</div>\n" +
+    "            </div>\n" +
+    "            <div class=\"review-btn-wrapper\">\n" +
+    "                <md-button class=\"md-primary znk\"\n" +
+    "                           aria-label=\"{{'COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.REVIEW' | translate}}\"\n" +
+    "                           autofocus\n" +
+    "                           tabindex=\"1\"\n" +
+    "                           md-no-ink\n" +
+    "                           ng-cloak\n" +
+    "                           ng-click=\"$ctrl.goToSummary()\">\n" +
+    "                    <span translate=\".REVIEW\"></span>\n" +
+    "                </md-button>\n" +
+    "            </div>\n" +
+    "        </section>\n" +
+    "        <section class=\"time-line-wrapper2\"\n" +
+    "                 ng-if=\"!$ctrl.isEssaySubject\"\n" +
+    "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
     "        <div class=\"estimated-score-title\">\n" +
-    "            <span translate=\"SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
+    "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
     "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
     "        <performance-timeline\n" +
     "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
     "            subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
+    "            show-induction=\"true\"\n" +
     "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "        </performance-timeline>\n" +
     "    </section>\n" +
-    "\n" +
-    "    <section class=\"proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
-    "        <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
-    "        <div class=\"row data-row\">\n" +
-    "            <div class=\"subject-level\">\n" +
-    "                <div class=\"test-score-name\">{{::$ctrl.testScoreMastery.testScorename}}</div>\n" +
-    "                <div class=\"subject-progress\">\n" +
-    "                    <div class=\"progress\">\n" +
-    "                        <div znk-progress-bar progress-width=\"{{::$ctrl.testScoreMastery.progress}}\"\n" +
-    "                             show-progress-value=\"false\"></div>\n" +
-    "                        <div class=\"title\" translate=\".MASTERY\"></div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"progress-val\">\n" +
-    "                        {{::$ctrl.testScoreMastery.progress}}%\n" +
-    "                        <div class=\"progress-perfect\"\n" +
-    "                             ng-class=\"{\n" +
+    "        <section class=\"proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
+    "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
+    "            <div class=\"row data-row\">\n" +
+    "                <div class=\"subject-level\">\n" +
+    "                    <div class=\"test-score-name\">{{::$ctrl.testScoreMastery.testScorename}}</div>\n" +
+    "                    <div class=\"subject-progress\">\n" +
+    "                        <div class=\"progress\">\n" +
+    "                            <div znk-progress-bar progress-width=\"{{::$ctrl.testScoreMastery.progress}}\"\n" +
+    "                                 show-progress-value=\"false\"></div>\n" +
+    "                            <div class=\"title\" translate=\".MASTERY\"></div>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"progress-val\">\n" +
+    "                            {{::$ctrl.testScoreMastery.progress}}%\n" +
+    "                            <div class=\"progress-perfect\"\n" +
+    "                                 ng-class=\"{\n" +
     "                                'bad-score': $ctrl.testScoreDelta<0\n" +
     "                             }\"\n" +
-    "                             ng-if=\"$ctrl.testScoreDelta != 0\">\n" +
-    "                            <span ng-if=\"$ctrl.testScoreDelta > 0\">+</span>\n" +
-    "                            {{$ctrl.testScoreDelta | number : 0}}\n" +
+    "                                 ng-if=\"$ctrl.testScoreDelta != 0\">\n" +
+    "                                <span ng-if=\"$ctrl.testScoreDelta > 0\">+</span>\n" +
+    "                                {{$ctrl.testScoreDelta | number : 0}}\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"category-level-wrap\">\n" +
+    "                    <div class=\"category-level\" ng-repeat=\"(key, category) in $ctrl.categoryMastery\">\n" +
+    "                        <div class=\"category-data\">\n" +
+    "                            <div class=\"category-level-name\">{{category.name}}</div>\n" +
+    "                            <div znk-progress-bar progress-width=\"{{category.progress}}\"\n" +
+    "                                 progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>\n" +
+    "                            <div class=\"level\">{{category.mastery}}</div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"category-level-wrap\">\n" +
-    "                <div class=\"category-level\" ng-repeat=\"(key, category) in $ctrl.categoryMastery\">\n" +
-    "                    <div class=\"category-data\">\n" +
-    "                        <div class=\"category-level-name\">{{category.name}}</div>\n" +
-    "                        <div znk-progress-bar progress-width=\"{{category.progress}}\"\n" +
-    "                             progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>\n" +
-    "                        <div class=\"level\">{{category.mastery}}</div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </section>\n" +
+    "        </section>\n" +
+    "    </div>\n" +
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/directives/socialSharing/socialSharing.template.html",
@@ -1579,12 +1513,12 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "        <div class=\"social-text\"\n" +
     "             translate=\".POINTS_TEXT\"\n" +
     "             ng-switch-when=\"false\"\n" +
-    "             translate-values=\"{ pts: {{vm.showSocialArea.points}}, subjectName: '{{vm.subjectName}}' }\">\n" +
+    "             translate-values=\"{ pts: {{vm.showSocialArea.realPoints}}, subjectName: '{{vm.subjectName}}' }\">\n" +
     "        </div>\n" +
     "        <div class=\"social-text\"\n" +
     "             translate=\".IMPROVED_TEXT\"\n" +
     "             ng-switch-when=\"true\"\n" +
-    "             translate-values=\"{ pts: {{vm.showSocialArea.points}}, subjectName: '{{vm.subjectName}}' }\">\n" +
+    "             translate-values=\"{ pts: {{vm.showSocialArea.realPoints}}, subjectName: '{{vm.subjectName}}' }\">\n" +
     "        </div>\n" +
     "        <social-share-btn-drv share-data=\"vm.shareData\"></social-share-btn-drv>\n" +
     "    </div>\n" +
@@ -1665,8 +1599,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "<answer-builder> </answer-builder>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/essayQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper writing-question-wrapper question-basic-style\">\n" +
     "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
@@ -1686,7 +1618,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "    <div ng-switch-when=\"true\" class=\"answer-status-wrapper\" ng-class=\"userAnswerStatus\">\n" +
     "        <div class=\"answer-status\">\n" +
     "            <div class=\"user-answer\">{{d.userAnswer}}</div>\n" +
-    "            <svg-icon class=\"correct-icon\" name=\"complete-exercise-correct-icon\"></svg-icon>\n" +
     "            <svg-icon class=\"wrong-icon\" name=\"complete-exercise-wrong-icon\"></svg-icon>\n" +
     "        </div>\n" +
     "        <div class=\"correct-answer\">\n" +
@@ -1714,8 +1645,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/mathQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"math-question-wrapper\" image-zoomer>\n" +
     "\n" +
     "    <div class=\"question-container\" znk-exercise-draw-container canvas-name=\"question\"></div>\n" +
@@ -1742,8 +1671,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/readingQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper reading-question-wrapper question-basic-style\" image-zoomer>\n" +
     "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
@@ -1775,51 +1702,36 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/simpleQuestion.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper simple-question-wrapper question-basic-style\" image-zoomer>\n" +
-    "\n" +
     "        <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "            <div class=\"question-content\"></div>\n" +
     "            <custom-answer-builder-sat></custom-answer-builder-sat>\n" +
     "        </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/writingFullPassage.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper english-full-paragraphs-wrapper question-basic-style\" image-zoomer>\n" +
-    "\n" +
     "    <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "        <div class=\"paragraph-title\"></div>\n" +
-    "\n" +
     "        <div class=\"paragraphs-wrapper\"></div>\n" +
-    "\n" +
     "    </div>\n" +
-    "\n" +
     "    <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "        <div class=\"question-content\"></div>\n" +
     "        <answer-builder></answer-builder>\n" +
     "    </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
   $templateCache.put("components/completeExerciseSat/templates/writingSpecificParagraph.template.html",
-    "<answer-explanation></answer-explanation>\n" +
-    "\n" +
     "<div class=\"question-wrapper writing-specific-paragraph-wrapper question-basic-style\" translate-namespace=\"WRITING_SPECIFIC_PARAGRAPH\">\n" +
     "\n" +
     "    <div class=\"specific-paragraph-view-wrapper\" ng-show=\"vm.view === vm.SPECIFIC_PARAGRAPH\" image-zoomer>\n" +
-    "        <div class=\"question-container znk-scrollbar\">\n" +
+    "        <div class=\"question-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"question\">\n" +
     "            <div class=\"full-passage-link\" ng-bind-html=\"vm.question.groupData.name\" ng-click=\"vm.view = vm.FULL_PASSAGE\"></div>\n" +
     "            <div class=\"paragraph-title\"></div>\n" +
     "            <div class=\"paragraph\"></div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"answer-container znk-scrollbar\">\n" +
+    "        <div class=\"answer-container znk-scrollbar\" znk-exercise-draw-container canvas-name=\"answer\">\n" +
     "            <div class=\"question-content\"></div>\n" +
     "            <answer-builder></answer-builder>\n" +
     "        </div>\n" +

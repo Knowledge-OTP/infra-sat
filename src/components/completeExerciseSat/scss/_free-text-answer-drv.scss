@@ -70,13 +70,14 @@ free-text-answer {
 
         .correct {
             svg-icon.correct-icon {
+                display: block;
+                margin-left: 10px;
                 svg {
                     @include dimension(26px, auto);
                     line {
                         stroke: $backgroundColor4;
                     }
                 }
-                display: block;
             }
 
             .user-answer {

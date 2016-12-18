@@ -134,7 +134,7 @@
 
                     performanceDataProm.then(function (performanceData) {
                         var subScoresKeys = Object.keys(categoryRawMastery);
-                        var subScoresArray = performanceData[subjectId].categoryArray;
+                        var subScoresArray = performanceData[subjectId].subscoreArray;
 
                         angular.forEach(subScoresKeys, function (subScoreKey) {
                             var progress = _getCategoryProgressById(subScoresArray, subScoreKey);
@@ -176,7 +176,7 @@
                     var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
                     var _questions = exerciseContent .questions;
                     var promArr;
-                    if (exerciseContent .subjectId !== SubjectEnum.ESSAY.enum) {
+                    if (exerciseContent.subjectId !== SubjectEnum.ESSAY.enum) {
                         promArr = _setSubScoreMastery(_questions);
                     } else {
                         promArr = _setGeneralMastery(_questions);
