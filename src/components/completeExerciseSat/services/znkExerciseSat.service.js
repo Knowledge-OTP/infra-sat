@@ -37,9 +37,9 @@
 
             function prepareDataForExerciseFinish(data) {
                 var examId, examData;
-                if (data.exerciseParentTypeId === ExerciseParentEnum.MODULE.enum) {  //if it's a module exam there is no exerciseParentContent
+                if (data.exerciseParentTypeId === ExerciseParentEnum.MODULE.enum) {  //if it's a module sections there is no exerciseParentContent
                     examData = data.moduleExamData;                                  // so take the exam data from data.moduleExamData
-                    examId = examData.id
+                    examId = examData.id;
                 } else {
                     examId = data.exerciseParentContent.id;
                     examData = data.exerciseParentContent;
