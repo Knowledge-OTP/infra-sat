@@ -1239,7 +1239,7 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService) {
+        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", "ExerciseParentEnum", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService, ExerciseParentEnum) {
             'ngInject';
 
             var self = this;
@@ -1273,9 +1273,15 @@
             }
 
             function prepareDataForExerciseFinish(data) {
-                var examId = data.exerciseParentContent.id;
+                var examId, examData;
+                if (data.exerciseParentTypeId === ExerciseParentEnum.MODULE.enum) {  //if it's a module sections there is no exerciseParentContent
+                    examData = data.moduleExamData;                                  // so take the exam data from data.moduleExamData
+                    examId = examData.id;
+                } else {
+                    examId = data.exerciseParentContent.id;
+                    examData = data.exerciseParentContent;
+                }
                 return ExerciseResultSrv.getExamResult(examId).then(function (examResult) {
-                    var examData = data.exerciseParentContent;
                     var exercise = data.exerciseContent;
                     var exerciseResult = data.exerciseResult;
 
