@@ -6,6 +6,7 @@
 "znk.infra-sat.configSat",
 "znk.infra-sat.examUtility",
 "znk.infra-sat.exerciseUtilitySat",
+"znk.infra-sat.lessonTopic",
 "znk.infra-sat.performance",
 "znk.infra-sat.socialSharingSat",
 "znk.infra-sat.userGoals"
@@ -2281,6 +2282,40 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($tem
 })(angular);
 
 angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function($templateCache) {
+
+}]);
+
+(function (angular) {
+    'use strict';
+
+    angular.module('znk.infra-sat.lessonTopic', [
+        'znk.infra.exerciseUtility'
+    ]);
+})(angular);
+
+(function (angular) {
+    'use strict';
+
+    angular.module('znk.infra-sat.lessonTopic').service('LessonTopicService', ["SubjectEnum", "LiveSessionSubjectEnum", function (SubjectEnum, LiveSessionSubjectEnum) {
+        'ngInject';
+        this.getTopicSubjects = function (topicId) {
+            var topicSubjects;
+            if (topicId === LiveSessionSubjectEnum.ENGLISH.enum) {
+                topicSubjects = {
+                    essay: SubjectEnum.ESSAY.enum,
+                    verbal: SubjectEnum.VERBAL.enum
+                };
+            } else if (topicId === LiveSessionSubjectEnum.MATH.enum) {
+                topicSubjects = {
+                    math: SubjectEnum.MATH.enum
+                };
+            }
+            return topicSubjects;
+        };
+    }]);
+})(angular);
+
+angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function($templateCache) {
 
 }]);
 
