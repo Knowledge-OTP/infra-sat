@@ -2296,19 +2296,25 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
 (function (angular) {
     'use strict';
 
-    angular.module('znk.infra-sat.lessonTopic').service('LessonTopicService', ["SubjectEnum", "LiveSessionSubjectEnum", function (SubjectEnum, LiveSessionSubjectEnum) {
+    angular.module('znk.infra-sat.lessonTopic').service('LessonTopicService', ["SubjectEnum", "LiveSessionSubjectEnum", "$log", function (SubjectEnum, LiveSessionSubjectEnum, $log) {
         'ngInject';
         this.getTopicSubjects = function (topicId) {
             var topicSubjects;
-            if (topicId === LiveSessionSubjectEnum.ENGLISH.enum) {
-                topicSubjects = {
-                    essay: SubjectEnum.ESSAY.enum,
-                    verbal: SubjectEnum.VERBAL.enum
-                };
-            } else if (topicId === LiveSessionSubjectEnum.MATH.enum) {
-                topicSubjects = {
-                    math: SubjectEnum.MATH.enum
-                };
+
+            switch (topicId) {
+                case LiveSessionSubjectEnum.ENGLISH.enum:
+                    topicSubjects = {
+                        essay: SubjectEnum.ESSAY.enum,
+                        verbal: SubjectEnum.VERBAL.enum
+                    };
+                    break;
+                case LiveSessionSubjectEnum.MATH.enum:
+                    topicSubjects = {
+                        math: SubjectEnum.MATH.enum
+                    };
+                    break;
+                default:
+                    $log.debug('No topic id');
             }
             return topicSubjects;
         };
