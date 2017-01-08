@@ -27,7 +27,7 @@
                     };
                     break;
                 default:
-                    $log.debug('No topic id');
+                    $log.error('Invalid topicId');
             }
             return topicSubjects;
         };

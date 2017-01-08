@@ -2314,7 +2314,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
                     };
                     break;
                 default:
-                    $log.debug('No topic id');
+                    $log.error('Invalid topicId');
             }
             return topicSubjects;
         };
