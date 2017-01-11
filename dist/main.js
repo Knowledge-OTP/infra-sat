@@ -1399,7 +1399,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            subject-id=\"::$ctrl.exerciseContent.subjectId\"\n" +
     "            animate=\"true\">\n" +
     "        </social-sharing>\n" +
-    "        <section>\n" +
+    "        <div class=\"section\">\n" +
     "            <div class=\"test-score-title\">{{::$ctrl.testScoreTitle}}</div>\n" +
     "            <div class=\"gauge-row-wrapper\">\n" +
     "                <div class=\"overflowWrap\">\n" +
@@ -1468,8 +1468,8 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                    <span translate=\".REVIEW\"></span>\n" +
     "                </md-button>\n" +
     "            </div>\n" +
-    "        </section>\n" +
-    "        <section class=\"time-line-wrapper2\"\n" +
+    "        </div>\n" +
+    "        <div class=\"section time-line-wrapper2\"\n" +
     "                 ng-if=\"!$ctrl.isEssaySubject\"\n" +
     "                 ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
@@ -1483,8 +1483,8 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            show-induction=\"true\"\n" +
     "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "        </performance-timeline>\n" +
-    "    </section>\n" +
-    "        <section class=\"proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
+    "    </div>\n" +
+    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
     "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
     "            <div class=\"row data-row\">\n" +
     "                <div class=\"subject-level\">\n" +
@@ -1520,7 +1520,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </section>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");

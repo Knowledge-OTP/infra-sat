@@ -10,7 +10,7 @@
             subject-id="::$ctrl.exerciseContent.subjectId"
             animate="true">
         </social-sharing>
-        <section>
+        <div class="section">
             <div class="test-score-title">{{::$ctrl.testScoreTitle}}</div>
             <div class="gauge-row-wrapper">
                 <div class="overflowWrap">
@@ -79,8 +79,8 @@
                     <span translate=".REVIEW"></span>
                 </md-button>
             </div>
-        </section>
-        <section class="time-line-wrapper2"
+        </div>
+        <div class="section time-line-wrapper2"
                  ng-if="!$ctrl.isEssaySubject"
                  ng-class="{
                 'seen-summary': $ctrl.seenSummary
@@ -94,8 +94,8 @@
             show-induction="true"
             active-exercise-id="::$ctrl.exerciseContent.id">
         </performance-timeline>
-    </section>
-        <section class="proficiency-level-row animate-if" ng-if="$ctrl.notSeenSummary">
+    </div>
+        <div class="section proficiency-level-row animate-if" ng-if="$ctrl.notSeenSummary">
             <div class="proficiency-title-row" translate=".MASTERY_LEVEL"></div>
             <div class="row data-row">
                 <div class="subject-level">
@@ -131,6 +131,6 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     </div>
 </div>
