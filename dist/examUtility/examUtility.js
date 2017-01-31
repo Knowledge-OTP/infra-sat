@@ -199,6 +199,6 @@
         }]);
 })();
 
-angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($templateCache) {
 
 }]);
