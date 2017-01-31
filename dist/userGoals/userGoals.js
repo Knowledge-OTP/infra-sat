@@ -105,6 +105,6 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.userGoals').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.userGoals').run(['$templateCache', function ($templateCache) {
 
 }]);

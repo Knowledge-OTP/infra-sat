@@ -1370,7 +1370,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\"\n" +
     "     translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\"\n" +
@@ -1445,7 +1445,6 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "            <div class=\"review-btn-wrapper\">\n" +
     "                <md-button class=\"md-primary znk\"\n" +
     "                           aria-label=\"{{'COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.REVIEW' | translate}}\"\n" +
-    "                           autofocus\n" +
     "                           tabindex=\"1\"\n" +
     "                           md-no-ink\n" +
     "                           ng-cloak\n" +
