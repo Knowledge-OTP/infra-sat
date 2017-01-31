@@ -25,9 +25,8 @@
         "SHARE_CAPTION": "Education App That Make It Easy To Study Hard!",
         "SHARE_HASHTAGS": "SAT, zinkerz, education"
     },
-
     "PERFORMANCE_SAT": {
-        "MASTERY_LEVEL":{
+        "MASTERY_LEVEL": {
             "NOVICE": "novice",
             "AVERAGE": "average",
             "ADVANCE": "advanced",
@@ -37,5 +36,8 @@
     },
     "PERFORMANCE_TIMELINE": {
         "POINTS_LEFT": "{{points}} pts to go!"
+    },
+    "FREE_TEXT_ANSWER": {
+        "CORRECT_ANSWER": "Correct answer: "
     }
 }
