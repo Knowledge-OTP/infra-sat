@@ -2,31 +2,14 @@
     'use strict';
 
     angular.module('znk.infra-sat.configSat')
-        .decorator('CategoryService', function ($delegate, $q, EnumSrv) {
+        .decorator('CategoryService', function ($delegate, $q, EnumSrv, categoryEnum) {
             'ngInject';
 
             var categoryService = $delegate;
-            var categoryTypeEnum = new EnumSrv.BaseEnum([
-                ['TUTORIAL', 1, 'tutorial'],
-                ['EXERCISE', 2, 'exercise'],
-                ['MINI_CHALLENGE', 3, 'miniChallenge'],
-                ['SECTION', 4, 'section'],
-                ['DRILL', 5, 'drill'],
-                ['GENERAL', 6, 'general'],
-                ['SPECIFIC', 7, 'specific'],
-                ['STRATEGY', 8, 'strategy'],
-                ['SUBJECT', 9, 'subject'],
-                ['SUB_SCORE', 10, 'subScore'],
-                ['TEST_SCORE', 11, 'testScore'],
-                ['LEVEL1', 9, 'level1Categories'],
-                ['LEVEL2', 11, 'level2Categories'],
-                ['LEVEL3', 6, 'level3Categories'],
-                ['LEVEL4', 7, 'level4Categories']
-
-            ]);
+            
 
             categoryService.getSubjectIdByCategory = function (category) {
-                if (category.typeId === categoryTypeEnum.SUBJECT.enum) {
+                if (category.typeId === categoryEnum.SUBJECT.enum) {
                     return $q.when(category.id);
                 }
                 return categoryService.getParentCategory(category.id).then(function (parentCategory) {
@@ -37,7 +20,7 @@
             categoryService.getTestScore = function (categoryId) {
                 return categoryService.getCategoryMap().then(function (categories) {
                     var category = categories[categoryId];
-                    if (categoryTypeEnum.TEST_SCORE.enum === category.typeId) {
+                    if (categoryEnum.TEST_SCORE.enum === category.typeId) {
                         return category;
                     }
                     return categoryService.getTestScore(category.parentId);
@@ -51,7 +34,7 @@
                         getAllGeneralCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
                             var generalCategories = {};
                             angular.forEach(categories, function (category) {
-                                if (category.typeId === categoryTypeEnum.GENERAL.enum) {
+                                if (category.typeId === categoryEnum.GENERAL.enum) {
                                     generalCategories[category.id] = category;
                                 }
                             });
@@ -93,7 +76,7 @@
                         getAllSpecificCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
                             var specificCategories = {};
                             angular.forEach(categories, function (category) {
-                                if (category.typeId === categoryTypeEnum.SPECIFIC.enum) {
+                                if (category.typeId === categoryEnum.SPECIFIC.enum) {
                                     specificCategories[category.id] = category;
                                 }
                             });
@@ -129,7 +112,7 @@
             })();
 
             categoryService.getSubjectIdByCategory = function (category) {
-                if (category.typeId === categoryTypeEnum.SUBJECT.enum) {
+                if (category.typeId === categoryEnum.SUBJECT.enum) {
                     return $q.when(category.id);
                 }
                 return categoryService.getParentCategory(category.id).then(function (parentCategory) {
