@@ -1792,10 +1792,10 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
             'ngInject';
 
             var categoryService = $delegate;
-            
+
 
             categoryService.getSubjectIdByCategory = function (category) {
-                if (category.typeId === categoryEnum.SUBJECT.enum) {
+                if (category.typeId === categoryEnum.LEVEL1.enum) {
                     return $q.when(category.id);
                 }
                 return categoryService.getParentCategory(category.id).then(function (parentCategory) {
@@ -1806,7 +1806,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
             categoryService.getTestScore = function (categoryId) {
                 return categoryService.getCategoryMap().then(function (categories) {
                     var category = categories[categoryId];
-                    if (categoryEnum.TEST_SCORE.enum === category.typeId) {
+                    if (categoryEnum.LEVEL2.enum === category.typeId) {
                         return category;
                     }
                     return categoryService.getTestScore(category.parentId);
@@ -1820,7 +1820,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
                         getAllGeneralCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
                             var generalCategories = {};
                             angular.forEach(categories, function (category) {
-                                if (category.typeId === categoryEnum.GENERAL.enum) {
+                                if (category.typeId === categoryEnum.LEVEL3.enum) {
                                     generalCategories[category.id] = category;
                                 }
                             });
@@ -1862,7 +1862,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
                         getAllSpecificCategoriesProm = categoryService.getCategoryMap().then(function (categories) {
                             var specificCategories = {};
                             angular.forEach(categories, function (category) {
-                                if (category.typeId === categoryEnum.SPECIFIC.enum) {
+                                if (category.typeId === categoryEnum.LEVEL4.enum) {
                                     specificCategories[category.id] = category;
                                 }
                             });
@@ -1898,7 +1898,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
             })();
 
             categoryService.getSubjectIdByCategory = function (category) {
-                if (category.typeId === categoryEnum.SUBJECT.enum) {
+                if (category.typeId === categoryEnum.LEVEL1.enum) {
                     return $q.when(category.id);
                 }
                 return categoryService.getParentCategory(category.id).then(function (parentCategory) {
