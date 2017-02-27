@@ -20,7 +20,7 @@
             categoryService.getTestScore = function (categoryId) {
                 return categoryService.getCategoryMap().then(function (categories) {
                     var category = categories[categoryId];
-                    if (categoryEnum.LEVEL2.enum === category.typeId) {
+                    if (category.typeId === categoryEnum.LEVEL2.enum) {
                         return category;
                     }
                     return categoryService.getTestScore(category.parentId);
