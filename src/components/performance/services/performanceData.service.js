@@ -5,18 +5,6 @@
         .service('PerformanceData', function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv) {
             'ngInject';
 
-            var statsLevelsMap = {
-                SUBJECT: 1,
-                TEST_SCORE: 2,
-                SPECIFIC: 4,
-                GENERAL: 3
-            };
-            var SUBJECTS = 'level1Categories';
-            var TESTSCORE = 'level2Categories';
-            var GENERAL_CATEGORYS = 'level3Categories';
-            var SPECIFIC_CATEGORYS = 'level4Categories';
-            var GENERAL_CATEGORY_LEVEL = 3;
-
             function _getSubjectId(parentsIds) {
                 return parentsIds[parentsIds.length - 1];
             }
@@ -55,8 +43,8 @@
 
             function _getMathAndVerbalPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelsMap.TEST_SCORE),
-                    StatsSrv.getLevelStats(statsLevelsMap.SPECIFIC)
+                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL2.enum),
+                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL4.enum)
 
                 ]).then(function (res) {
                     var testScoreStats = res[0] || {};
@@ -124,8 +112,8 @@
 
             function _getEssayPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelsMap.TEST_SCORE),
-                    StatsSrv.getLevelStats(statsLevelsMap.GENERAL)
+                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL2.enum),
+                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL3.enum)
                 ]).then(function (res) {
                     var testScoreLevelStats = res[0] || {};
                     var generalCategoryLevelStats = res[1] || {};
@@ -172,7 +160,7 @@
                 var subjectsKeys = Object.keys(subjectsObj);
                 var promArr = [];
                 angular.forEach(subjectsKeys, function (subjectkey) {
-                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(GENERAL_CATEGORY_LEVEL, null, subjectsObj[subjectkey].id);
+                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(statsLevelENUM.LEVEL3.enum, null, subjectsObj[subjectkey].id);
                     promArr.push(prom);
                 });
 
@@ -371,12 +359,12 @@
 
                     _calcVerbalAvgMastry(performanceData);
 
-                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[SPECIFIC_CATEGORYS]);
+                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[statsLevelENUM.LEVEL4.val]);
 
-                    return _buildWeakestCategory(stats[SUBJECTS], performanceData).then(function (newPerformanceData) {
-                        performanceData = _buildTestScore(stats[TESTSCORE], newPerformanceData);
-                        return _buildGeneralCategories(stats[GENERAL_CATEGORYS], performanceData).then(function (performanceWithTestScore) {
-                            return _buildSpecificCategories(stats[SPECIFIC_CATEGORYS], performanceWithTestScore).then(function (_performanceData) {
+                    return _buildWeakestCategory(stats[statsLevelENUM.LEVEL1.val], performanceData).then(function (newPerformanceData) {
+                        performanceData = _buildTestScore(stats[statsLevelENUM.LEVEL2.val], newPerformanceData);
+                        return _buildGeneralCategories(stats[statsLevelENUM.LEVEL3.val], performanceData).then(function (performanceWithTestScore) {
+                            return _buildSpecificCategories(stats[statsLevelENUM.LEVEL4.val], performanceWithTestScore).then(function (_performanceData) {
                                 return _performanceData;
                             });
                         });
