@@ -2664,20 +2664,8 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
     'use strict';
 
     angular.module('znk.infra-sat.performance')
-        .service('PerformanceData', ["$q", "masteryLevel", "StatsSrv", "SubScoreSrv", "SubjectEnum", "TestScoreCategoryEnum", "CategoryService", "StatsQuerySrv", function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv) {
+        .service('PerformanceData', ["$q", "masteryLevel", "StatsSrv", "SubScoreSrv", "SubjectEnum", "TestScoreCategoryEnum", "CategoryService", "StatsQuerySrv", "StatsLevelEnum", function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv, StatsLevelEnum) {
             'ngInject';
-
-            var statsLevelsMap = {
-                SUBJECT: 1,
-                TEST_SCORE: 2,
-                SPECIFIC: 4,
-                GENERAL: 3
-            };
-            var SUBJECTS = 'level1Categories';
-            var TESTSCORE = 'level2Categories';
-            var GENERAL_CATEGORYS = 'level3Categories';
-            var SPECIFIC_CATEGORYS = 'level4Categories';
-            var GENERAL_CATEGORY_LEVEL = 3;
 
             function _getSubjectId(parentsIds) {
                 return parentsIds[parentsIds.length - 1];
@@ -2717,8 +2705,8 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
 
             function _getMathAndVerbalPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelsMap.TEST_SCORE),
-                    StatsSrv.getLevelStats(statsLevelsMap.SPECIFIC)
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL2.enum),
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL4.enum)
 
                 ]).then(function (res) {
                     var testScoreStats = res[0] || {};
@@ -2786,8 +2774,8 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
 
             function _getEssayPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelsMap.TEST_SCORE),
-                    StatsSrv.getLevelStats(statsLevelsMap.GENERAL)
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL2.enum),
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL3.enum)
                 ]).then(function (res) {
                     var testScoreLevelStats = res[0] || {};
                     var generalCategoryLevelStats = res[1] || {};
@@ -2834,7 +2822,7 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
                 var subjectsKeys = Object.keys(subjectsObj);
                 var promArr = [];
                 angular.forEach(subjectsKeys, function (subjectkey) {
-                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(GENERAL_CATEGORY_LEVEL, null, subjectsObj[subjectkey].id);
+                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(StatsLevelEnum.LEVEL3.enum, null, subjectsObj[subjectkey].id);
                     promArr.push(prom);
                 });
 
@@ -3033,12 +3021,12 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
 
                     _calcVerbalAvgMastry(performanceData);
 
-                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[SPECIFIC_CATEGORYS]);
+                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[StatsLevelEnum.LEVEL4.val]);
 
-                    return _buildWeakestCategory(stats[SUBJECTS], performanceData).then(function (newPerformanceData) {
-                        performanceData = _buildTestScore(stats[TESTSCORE], newPerformanceData);
-                        return _buildGeneralCategories(stats[GENERAL_CATEGORYS], performanceData).then(function (performanceWithTestScore) {
-                            return _buildSpecificCategories(stats[SPECIFIC_CATEGORYS], performanceWithTestScore).then(function (_performanceData) {
+                    return _buildWeakestCategory(stats[StatsLevelEnum.LEVEL1.val], performanceData).then(function (newPerformanceData) {
+                        performanceData = _buildTestScore(stats[StatsLevelEnum.LEVEL2.val], newPerformanceData);
+                        return _buildGeneralCategories(stats[StatsLevelEnum.LEVEL3.val], performanceData).then(function (performanceWithTestScore) {
+                            return _buildSpecificCategories(stats[StatsLevelEnum.LEVEL4.val], performanceWithTestScore).then(function (_performanceData) {
                                 return _performanceData;
                             });
                         });

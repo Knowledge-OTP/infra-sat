@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('znk.infra-sat.performance')
-        .service('PerformanceData', function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv) {
+        .service('PerformanceData', function($q, masteryLevel, StatsSrv, SubScoreSrv, SubjectEnum, TestScoreCategoryEnum, CategoryService, StatsQuerySrv, StatsLevelEnum) {
             'ngInject';
 
             function _getSubjectId(parentsIds) {
@@ -43,8 +43,8 @@
 
             function _getMathAndVerbalPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL2.enum),
-                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL4.enum)
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL2.enum),
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL4.enum)
 
                 ]).then(function (res) {
                     var testScoreStats = res[0] || {};
@@ -112,8 +112,8 @@
 
             function _getEssayPerformanceData() {
                 return $q.all([
-                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL2.enum),
-                    StatsSrv.getLevelStats(statsLevelENUM.LEVEL3.enum)
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL2.enum),
+                    StatsSrv.getLevelStats(StatsLevelEnum.LEVEL3.enum)
                 ]).then(function (res) {
                     var testScoreLevelStats = res[0] || {};
                     var generalCategoryLevelStats = res[1] || {};
@@ -160,7 +160,7 @@
                 var subjectsKeys = Object.keys(subjectsObj);
                 var promArr = [];
                 angular.forEach(subjectsKeys, function (subjectkey) {
-                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(statsLevelENUM.LEVEL3.enum, null, subjectsObj[subjectkey].id);
+                    var prom = StatsQuerySrv.getWeakestCategoryInLevel(StatsLevelEnum.LEVEL3.enum, null, subjectsObj[subjectkey].id);
                     promArr.push(prom);
                 });
 
@@ -359,12 +359,12 @@
 
                     _calcVerbalAvgMastry(performanceData);
 
-                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[statsLevelENUM.LEVEL4.val]);
+                    _calcSubScoreSpecificCategory(performanceData, allSpecificCategories, stats[StatsLevelEnum.LEVEL4.val]);
 
-                    return _buildWeakestCategory(stats[statsLevelENUM.LEVEL1.val], performanceData).then(function (newPerformanceData) {
-                        performanceData = _buildTestScore(stats[statsLevelENUM.LEVEL2.val], newPerformanceData);
-                        return _buildGeneralCategories(stats[statsLevelENUM.LEVEL3.val], performanceData).then(function (performanceWithTestScore) {
-                            return _buildSpecificCategories(stats[statsLevelENUM.LEVEL4.val], performanceWithTestScore).then(function (_performanceData) {
+                    return _buildWeakestCategory(stats[StatsLevelEnum.LEVEL1.val], performanceData).then(function (newPerformanceData) {
+                        performanceData = _buildTestScore(stats[StatsLevelEnum.LEVEL2.val], newPerformanceData);
+                        return _buildGeneralCategories(stats[StatsLevelEnum.LEVEL3.val], performanceData).then(function (performanceWithTestScore) {
+                            return _buildSpecificCategories(stats[StatsLevelEnum.LEVEL4.val], performanceWithTestScore).then(function (_performanceData) {
                                 return _performanceData;
                             });
                         });
