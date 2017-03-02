@@ -7,7 +7,7 @@
     <complete-exercise-header></complete-exercise-header>
     <div class="complete-exercise-summary-wrapper">
         <social-sharing
-            subject-id="::$ctrl.exerciseContent.subjectId"
+            subject-id="::$ctrl.exerciseResult.subjectId"
             animate="true">
         </social-sharing>
         <div class="section">
@@ -85,11 +85,11 @@
                 'seen-summary': $ctrl.seenSummary
              }">
         <div class="estimated-score-title">
-            <span translate="COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}"></span>
+            <span translate="COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseResult.subjectId}}"></span>
             <span translate=".ESTIMATED_SCORE"></span></div>
         <performance-timeline
             on-timeline-finish="$ctrl.onTimelineFinish(subjectDelta)"
-            subject-id="{{::$ctrl.exerciseContent.subjectId}}"
+            subject-id="{{::$ctrl.exerciseResult.subjectId}}"
             show-induction="true"
             active-exercise-id="::$ctrl.exerciseContent.id">
         </performance-timeline>

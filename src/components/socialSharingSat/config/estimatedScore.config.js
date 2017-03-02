@@ -2,9 +2,11 @@
     'use strict';
 
     angular.module('znk.infra-sat.socialSharingSat')
-        .config(function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst,EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst) {
+        .config(function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst,EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst, CategoryServiceProvider) {
             'ngInject';
 
+            var categoryService = CategoryServiceProvider.$get();
+        
             var subjectsRawScoreEdges = {};
             subjectsRawScoreEdges[SubjectEnumConst.VERBAL] = {
                 min: 0,
@@ -47,7 +49,8 @@
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    return exercise.subjectId !== SubjectEnum.ESSAY.enum;
+                    var exerciseSubjedctId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    return exerciseSubjedctId !== SubjectEnum.ESSAY.enum;
                 };
             }
 

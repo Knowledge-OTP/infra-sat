@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .service('completeExerciseSatSrv', function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService, ExerciseParentEnum) {
+        .service('completeExerciseSatSrv', function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService, ExerciseParentEnum, CategoryService) {
             'ngInject';
 
             var self = this;
@@ -61,16 +61,16 @@
                         var questionResults;
                         if (mergeSectionData) {
                             questionResults = mergeSectionData.resultsData.questionResults;
-                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exercise.subjectId);
+                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exerciseResult.subjectId);
                             proms.sectionScoring = scoringSectionProm;
                             // if math - testScoring is calculated per section and not per test
-                            if (exercise.subjectId === SubjectEnum.MATH.enum) {
+                            if (exerciseResult.subjectId === SubjectEnum.MATH.enum) {
                                 scoringTestProm = ScoringService.getTestScoreResult(questionResults, examData.typeId, exercise.categoryId);
                                 proms.testScoring = scoringTestProm;
                             }
                         }
                         // if not math - testScoring is calculated per test
-                        if (exercise.subjectId !== SubjectEnum.MATH.enum) {
+                        if (exerciseResult.subjectId !== SubjectEnum.MATH.enum) {
                             scoringTestProm = ScoringService.getTestScoreResult(exerciseResult.questionResults, examData.typeId, exercise.categoryId);
                             proms.testScoring = scoringTestProm;
                         }
@@ -89,12 +89,13 @@
                 resultsData = angular.copy(resultsData);
                 questionsData = angular.copy(questionsData);
                 var examId = exam.id;
-                var subjectId = questionsData.subjectId;
-                var currentSectionId = questionsData.id;
+                var questionSubjectId = CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
+                var subjectId = questionSubjectId;                
                 var sectionResults = examResult.sectionResults;
                 var sectionProms = [];
                 var getOtherSections = exam.sections.filter(function (section) {
-                    return section.subjectId === subjectId && currentSectionId !== section.id;
+                    var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                    return sectionSubjectId === subjectId && sectionSubjectId !== section.id;
                 });
                 angular.forEach(getOtherSections, function (sectionBySubject) {
                     var sectionKey = sectionResults[sectionBySubject.id];
@@ -129,12 +130,13 @@
 
             this.afterBroadcastFinishExercise = function (data) {
                 var isSection = data.exerciseDetails.exerciseTypeId === ExerciseTypeEnum.SECTION.enum;
-                var isEssay = data.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                var isEssay = data.exerciseResult.subjectId === SubjectEnum.ESSAY.enum;
                 // only if it's section and not essay, save score!
                 if (isSection && !isEssay) {
                     prepareDataForExerciseFinish(data).then(function (result) {
+                        var exerciseSubjectId = CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
                         if (result.sectionScoring) {
-                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, result.exercise.subjectId);
+                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, exerciseSubjectId);
                         }
                         if (result.testScoring) {
                             saveTestScoring(result.examResult, result.testScoring.testScore, result.exercise.categoryId);
