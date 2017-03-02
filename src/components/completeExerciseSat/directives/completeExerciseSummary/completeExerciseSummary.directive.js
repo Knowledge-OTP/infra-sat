@@ -130,7 +130,7 @@
                 }
 
                 function _calcCategoryMastery(categoryRawMastery) {
-                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseContent().subjectId;
+                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseResult().subjectId;
 
                     performanceDataProm.then(function (performanceData) {
                         var subScoresKeys = Object.keys(categoryRawMastery);
@@ -174,9 +174,10 @@
                     $ctrl.categoryMastery = {};
 
                     var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
+                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseResult().subjectId;
                     var _questions = exerciseContent .questions;
                     var promArr;
-                    if (exerciseContent.subjectId !== SubjectEnum.ESSAY.enum) {
+                    if (subjectId !== SubjectEnum.ESSAY.enum) {
                         promArr = _setSubScoreMastery(_questions);
                     } else {
                         promArr = _setGeneralMastery(_questions);
@@ -196,7 +197,7 @@
 
                 this.exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
                 this.exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
-                this.isEssaySubject = this.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                this.isEssaySubject = this.exerciseResult.subjectId === SubjectEnum.ESSAY.enum;
 
                 if(!this.exerciseResult.seenSummary){
                     this.notSeenSummary = true;

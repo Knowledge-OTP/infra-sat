@@ -7,7 +7,7 @@
     };
 
     angular.module('znk.infra-sat.examUtility')
-        .service('ScoringService',function ($q, ExamTypeEnum, StorageRevSrv, $log, SubScoreSrv) {
+        .service('ScoringService',function ($q, ExamTypeEnum, StorageRevSrv, $log, SubScoreSrv, CategoryService) {
             'ngInject';
 
             var keysMapConst = {
@@ -105,6 +105,7 @@
                 angular.forEach(mergeSections, function (section) {
                     angular.forEach(section.questionResults, function (questionResult) {
                         var subScoresArrProm = SubScoreSrv.getSpecificCategorySubScores(questionResult.categoryId);
+                        var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
                         subScoresArrProm.then(function (subScoresArr) {
                             if (subScoresArr.length > 0) {
                                 angular.forEach(subScoresArr, function (subScore) {
@@ -112,7 +113,7 @@
                                         subScoresMap[subScore.id] = {
                                             raw: 0,
                                             name: subScore.name,
-                                            subjectId: section.subjectId
+                                            subjectId: sectionSubjectId
                                         };
                                     }
                                     if (_isShouldAddToScore(questionResult)) {

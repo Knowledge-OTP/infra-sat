@@ -342,7 +342,7 @@
                 }
 
                 function _calcCategoryMastery(categoryRawMastery) {
-                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseContent().subjectId;
+                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseResult().subjectId;
 
                     performanceDataProm.then(function (performanceData) {
                         var subScoresKeys = Object.keys(categoryRawMastery);
@@ -386,9 +386,10 @@
                     $ctrl.categoryMastery = {};
 
                     var exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
+                    var subjectId = $ctrl.completeExerciseCtrl.getExerciseResult().subjectId;
                     var _questions = exerciseContent .questions;
                     var promArr;
-                    if (exerciseContent.subjectId !== SubjectEnum.ESSAY.enum) {
+                    if (subjectId !== SubjectEnum.ESSAY.enum) {
                         promArr = _setSubScoreMastery(_questions);
                     } else {
                         promArr = _setGeneralMastery(_questions);
@@ -408,7 +409,7 @@
 
                 this.exerciseResult = $ctrl.completeExerciseCtrl.getExerciseResult();
                 this.exerciseContent = $ctrl.completeExerciseCtrl.getExerciseContent();
-                this.isEssaySubject = this.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                this.isEssaySubject = this.exerciseResult.subjectId === SubjectEnum.ESSAY.enum;
 
                 if(!this.exerciseResult.seenSummary){
                     this.notSeenSummary = true;
@@ -1226,7 +1227,7 @@
     'use strict';
 
     angular.module('znk.infra-sat.completeExerciseSat')
-        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", "ExerciseParentEnum", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService, ExerciseParentEnum) {
+        .service('completeExerciseSatSrv', ["$q", "$log", "ExerciseTypeEnum", "SubjectEnum", "ExerciseResultSrv", "ExamSrv", "ScoringService", "ExerciseParentEnum", "CategoryService", function ($q, $log, ExerciseTypeEnum, SubjectEnum, ExerciseResultSrv, ExamSrv, ScoringService, ExerciseParentEnum, CategoryService) {
             'ngInject';
 
             var self = this;
@@ -1285,16 +1286,16 @@
                         var questionResults;
                         if (mergeSectionData) {
                             questionResults = mergeSectionData.resultsData.questionResults;
-                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exercise.subjectId);
+                            scoringSectionProm = ScoringService.getSectionScoreResult(questionResults, examData.typeId, exerciseResult.subjectId);
                             proms.sectionScoring = scoringSectionProm;
                             // if math - testScoring is calculated per section and not per test
-                            if (exercise.subjectId === SubjectEnum.MATH.enum) {
+                            if (exerciseResult.subjectId === SubjectEnum.MATH.enum) {
                                 scoringTestProm = ScoringService.getTestScoreResult(questionResults, examData.typeId, exercise.categoryId);
                                 proms.testScoring = scoringTestProm;
                             }
                         }
                         // if not math - testScoring is calculated per test
-                        if (exercise.subjectId !== SubjectEnum.MATH.enum) {
+                        if (exerciseResult.subjectId !== SubjectEnum.MATH.enum) {
                             scoringTestProm = ScoringService.getTestScoreResult(exerciseResult.questionResults, examData.typeId, exercise.categoryId);
                             proms.testScoring = scoringTestProm;
                         }
@@ -1313,12 +1314,13 @@
                 resultsData = angular.copy(resultsData);
                 questionsData = angular.copy(questionsData);
                 var examId = exam.id;
-                var subjectId = questionsData.subjectId;
-                var currentSectionId = questionsData.id;
+                var questionSubjectId = CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
+                var subjectId = questionSubjectId;                
                 var sectionResults = examResult.sectionResults;
                 var sectionProms = [];
                 var getOtherSections = exam.sections.filter(function (section) {
-                    return section.subjectId === subjectId && currentSectionId !== section.id;
+                    var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                    return sectionSubjectId === subjectId && sectionSubjectId !== section.id;
                 });
                 angular.forEach(getOtherSections, function (sectionBySubject) {
                     var sectionKey = sectionResults[sectionBySubject.id];
@@ -1353,12 +1355,13 @@
 
             this.afterBroadcastFinishExercise = function (data) {
                 var isSection = data.exerciseDetails.exerciseTypeId === ExerciseTypeEnum.SECTION.enum;
-                var isEssay = data.exerciseContent.subjectId === SubjectEnum.ESSAY.enum;
+                var isEssay = data.exerciseResult.subjectId === SubjectEnum.ESSAY.enum;
                 // only if it's section and not essay, save score!
                 if (isSection && !isEssay) {
                     prepareDataForExerciseFinish(data).then(function (result) {
+                        var exerciseSubjectId = CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
                         if (result.sectionScoring) {
-                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, result.exercise.subjectId);
+                            saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, exerciseSubjectId);
                         }
                         if (result.testScoring) {
                             saveTestScoring(result.examResult, result.testScoring.testScore, result.exercise.categoryId);
@@ -1381,7 +1384,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "    <complete-exercise-header></complete-exercise-header>\n" +
     "    <div class=\"complete-exercise-summary-wrapper\">\n" +
     "        <social-sharing\n" +
-    "            subject-id=\"::$ctrl.exerciseContent.subjectId\"\n" +
+    "            subject-id=\"::$ctrl.exerciseResult.subjectId\"\n" +
     "            animate=\"true\">\n" +
     "        </social-sharing>\n" +
     "        <div class=\"section\">\n" +
@@ -1459,11 +1462,11 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
     "        <div class=\"estimated-score-title\">\n" +
-    "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseContent.subjectId}}\"></span>\n" +
+    "            <span translate=\"COMPLETE_EXERCISE.SUBJECTS.{{$ctrl.exerciseResult.subjectId}}\"></span>\n" +
     "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
     "        <performance-timeline\n" +
     "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
-    "            subject-id=\"{{::$ctrl.exerciseContent.subjectId}}\"\n" +
+    "            subject-id=\"{{::$ctrl.exerciseResult.subjectId}}\"\n" +
     "            show-induction=\"true\"\n" +
     "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "        </performance-timeline>\n" +

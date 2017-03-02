@@ -2,7 +2,8 @@
     'use strict';
 
     angular.module('znk.infra-sat.socialSharingSat', [
-        'znk.infra-sat.configSat'
+        'znk.infra-sat.configSat',
+        'znk.infra.contentGetters'
     ]);
 })(angular);
 
@@ -10,11 +11,13 @@
     'use strict';
 
     angular.module('znk.infra-sat.socialSharingSat')
-        .config(["EstimatedScoreSrvProvider", "SubjectEnumConst", "EstimatedScoreEventsHandlerSrvProvider", "exerciseTypeConst", function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst,EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst) {
+        .config(["EstimatedScoreSrvProvider", "SubjectEnumConst", "EstimatedScoreEventsHandlerSrvProvider", "exerciseTypeConst", "CategoryServiceProvider", function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst,EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst, CategoryServiceProvider) {
             'ngInject';
 
             rawScoreToScoreFnGetter.$inject = ["ScoringService"];
             eventProcessControl.$inject = ["SubjectEnum"];
+            var categoryService = CategoryServiceProvider.$get();
+        
             var subjectsRawScoreEdges = {};
             subjectsRawScoreEdges[SubjectEnumConst.VERBAL] = {
                 min: 0,
@@ -57,7 +60,8 @@
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    return exercise.subjectId !== SubjectEnum.ESSAY.enum;
+                    var exerciseSubjedctId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    return exerciseSubjedctId !== SubjectEnum.ESSAY.enum;
                 };
             }
 
