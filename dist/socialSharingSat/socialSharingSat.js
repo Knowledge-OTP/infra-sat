@@ -236,6 +236,6 @@
         });
 })(angular);
 
-angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function($templateCache) {
 
 }]);

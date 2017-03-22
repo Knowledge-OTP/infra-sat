@@ -1388,7 +1388,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\"\n" +
     "     translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\"\n" +
@@ -1952,7 +1952,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
         }]);
 })();
 
-angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/configSat/svg/znk-app-name-logo.svg",
     "<svg version=\"1.1\" id=\"SAT\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"-187 363 236 67\" class=\"znk-app-name-logo\">\n" +
     "<style type=\"text/css\">\n" +
@@ -2231,7 +2231,7 @@ angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($temp
         }]);
 })();
 
-angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -2348,7 +2348,7 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($te
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -2388,7 +2388,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
     }]);
 })(angular);
 
-angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -3043,7 +3043,7 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.performance').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.performance').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/performance/directives/performanceTimeline/performanceTimeline.template.html",
     "<div class=\"performance-timeline znk-scrollbar\" translate-namespace=\"PERFORMANCE_TIMELINE\">\n" +
     "    <div class=\"time-line-wrapper\">\n" +
@@ -3319,7 +3319,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
         });
 })(angular);
 
-angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -3335,52 +3335,50 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
     'use strict';
 
     angular.module('znk.infra-sat.userGoals')
-        .service('UserGoalsService', ["StorageFirebaseAdapter", "StorageSrv", "ENV", "$q", "AuthService", function (StorageFirebaseAdapter, StorageSrv, ENV, $q, AuthService) {
+        .service('UserGoalsService', ["InfraConfigSrv", "StorageSrv", "ENV", "$q", function (InfraConfigSrv, StorageSrv, ENV, $q) {
             'ngInject';
 
-            var fbAdapter = new StorageFirebaseAdapter(ENV.fbDataEndPoint);
-            var config = {
-                variables: {
-                    uid: AuthService.getAuth().uid
-                }
-            };
-            var storage = new StorageSrv(fbAdapter, config);
             var goalsPath = StorageSrv.variables.appUserSpacePath + '/goals';
             var defaultSubjectScore = 600;
-            var self = this;
 
-            this.getGoals = function () {
-                return storage.get(goalsPath).then(function (userGoals) {
-                    if (angular.equals(userGoals, {})) {
-                        userGoals = _defaultUserGoals();
-                    }
-                    return userGoals;
+            function _getGoals() {
+                return InfraConfigSrv.getStudentStorage().then(function(studentStorage) {
+                    return studentStorage.get(goalsPath).then(function (userGoals) {
+                        if (Object.keys(userGoals).length === 0) {
+                            userGoals = _defaultUserGoals();
+                        }
+                        return userGoals;
+                    });
                 });
-            };
+            }
 
-            this.setGoals = function (newGoals) {
-                if (arguments.length && angular.isDefined(newGoals)) {
-                    return storage.set(goalsPath, newGoals);
+            function _setGoals(newGoals) {
+                if (arguments.length && typeof newGoals !== 'undefined') {
+                    return InfraConfigSrv.getStudentStorage().then(function(studentStorage) {
+                        return studentStorage.set(goalsPath, newGoals);
+                    });
                 }
-                return storage.get(goalsPath).then(function (userGoals) {
-                    if (!userGoals.goals) {
-                        userGoals.goals = {
-                            isCompleted: false,
-                            verbal: defaultSubjectScore,
-                            math: defaultSubjectScore,
-                            totalScore: defaultSubjectScore * 2
-                        };
-                    }
-                    return userGoals;
+                return InfraConfigSrv.getStudentStorage().then(function(studentStorage) {
+                    return studentStorage.get(goalsPath).then(function (userGoals) {
+                        if (!userGoals.goals) {
+                            userGoals.goals = {
+                                isCompleted: false,
+                                verbal: defaultSubjectScore,
+                                math: defaultSubjectScore,
+                                totalScore: defaultSubjectScore * 2
+                            };
+                        }
+                        return userGoals;
+                    });
                 });
-            };
+            }
 
-            this.calcCompositeScore = function (userSchools, save) {
+            function _calcCompositeScore(userSchools, save) {
                 // The calculation for composite score in ACT:
                 // 1. For each school in US, we have min & max score
                 // 2. Calc the average score for each school and set it for each subject goal
 
-                return this.getGoals().then(function (userGoals) {
+                return _getGoals().then(function (userGoals) {
                     var minSchoolScore = 400,
                         maxSchoolScore = 1600,
                         avgScores = [];
@@ -3407,11 +3405,11 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
                         math: avgSchoolsScore || defaultSubjectScore
                     };
 
-                    userGoals.totalScore = averageSubjectsGoal(userGoals);
-                    var prom = save ? self.setGoals(userGoals) : $q.when(userGoals);
+                    userGoals.totalScore = _averageSubjectsGoal(userGoals);
+                    var prom = save ? _setGoals(userGoals) : $q.when(userGoals);
                     return prom;
                 });
-            };
+            }
 
             function _defaultUserGoals() {
                 return {
@@ -3422,14 +3420,18 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
                 };
             }
 
-            function averageSubjectsGoal(goals) {
+            function _averageSubjectsGoal(goals) {
                 var math = goals.math || defaultSubjectScore;
                 var verbal = goals.english || defaultSubjectScore;
                 return Math.round((math + verbal) / 2);
             }
+
+            this.getGoals = _getGoals;
+            this.setGoals = _setGoals;
+            this.calcCompositeScore = _calcCompositeScore;
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.userGoals').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.userGoals').run(['$templateCache', function($templateCache) {
 
 }]);
