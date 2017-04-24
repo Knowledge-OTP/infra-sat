@@ -1318,9 +1318,10 @@
                 var subjectId = questionSubjectId;                
                 var sectionResults = examResult.sectionResults;
                 var sectionProms = [];
+                var currentSectionId = questionsData.id;
                 var getOtherSections = exam.sections.filter(function (section) {
                     var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
-                    return sectionSubjectId === subjectId && sectionSubjectId !== section.id;
+                    return sectionSubjectId === subjectId && currentSectionId !== section.id;
                 });
                 angular.forEach(getOtherSections, function (sectionBySubject) {
                     var sectionKey = sectionResults[sectionBySubject.id];
@@ -1373,7 +1374,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\"\n" +
     "     translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\"\n" +
