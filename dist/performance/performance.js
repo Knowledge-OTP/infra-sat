@@ -649,7 +649,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.performance').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.performance').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/performance/directives/performanceTimeline/performanceTimeline.template.html",
     "<div class=\"performance-timeline znk-scrollbar\" translate-namespace=\"PERFORMANCE_TIMELINE\">\n" +
     "    <div class=\"time-line-wrapper\">\n" +
