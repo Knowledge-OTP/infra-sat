@@ -18,9 +18,7 @@ article, .article {
     position: relative; }
   article .article-content, .article .article-content {
     width: 475px;
-    display: inline-block;
-    font-weight: 100;
-    font-size: 16px; }
+    display: inline-block; }
     article .article-content .num-article, .article .article-content .num-article {
       font-size: 15px;
       color: #757a83;
@@ -41,10 +39,6 @@ article, .article {
     font-size: 14px;
     text-align: center;
     padding: 0 3px; }
-  article strong, .article strong {
-    font-family: Lato;
-    font-weight: 200;
-    font-size: 16px; }
 
 custom-answer-builder-sat .instructions-title-wrapper {
   font-size: 14px;
@@ -107,11 +101,6 @@ essay-question .writing-question-wrapper {
     padding-right: 25px; }
   essay-question .writing-question-wrapper .answer-container {
     margin-left: 20px; }
-    essay-question .writing-question-wrapper .answer-container .question-content {
-      font-size: 18px;
-      color: #161616;
-      font-family: Lato;
-      font-weight: 400; }
     essay-question .writing-question-wrapper .answer-container p {
       color: #4f4d4d;
       line-height: 1.5em; }
@@ -360,8 +349,7 @@ reading-question {
   display: block; }
   reading-question .reading-question-wrapper {
     display: -ms-flexbox;
-    display: flex;
-    font-family: Lato; }
+    display: flex; }
     reading-question .reading-question-wrapper .question-container {
       padding-left: 35px; }
       reading-question .reading-question-wrapper .question-container .paragraph-title {
@@ -383,8 +371,6 @@ reading-question {
 
 select-answer {
   font-size: 18px;
-  color: #161616;
-  font-family: Lato;
   display: block; }
   select-answer .answer {
     display: -ms-flexbox;
@@ -511,12 +497,6 @@ select-answer {
         top: 8px;
         left: 9px; }
 
-znk-exercise .question-basic-style .question-container {
-  font-size: 16px;
-  color: #161616;
-  font-family: Lato;
-  font-weight: 400; }
-
 znk-exercise .question-basic-style .answer-container .content p {
   max-width: 370px;
   line-height: 1.5em; }
@@ -541,9 +521,6 @@ znk-exercise simple-question .simple-question-wrapper {
     overflow-y: auto; }
     znk-exercise simple-question .simple-question-wrapper .answer-container .question-content {
       font-size: 18px;
-      color: #161616;
-      font-family: Lato;
-      font-weight: 400;
       margin-bottom: 1em; }
       znk-exercise simple-question .simple-question-wrapper .answer-container .question-content p:last-child {
         margin-bottom: 0;
@@ -562,21 +539,15 @@ writing-full-passage .english-full-paragraphs-wrapper {
     writing-full-passage .english-full-paragraphs-wrapper .question-container .paragraph-title {
       font-size: 16px;
       color: #4f4d4d;
-      font-family: Lato;
-      font-weight: 400;
       text-align: center; }
     writing-full-passage .english-full-paragraphs-wrapper .question-container p {
       font-size: 16px;
       color: #161616;
-      font-family: Lato;
-      font-weight: 200;
       margin-top: 13px;
       line-height: 1.5em; }
     writing-full-passage .english-full-paragraphs-wrapper .question-container .paragraphs-wrapper .paragraph-number-title {
       font-size: 16px;
       color: #161616;
-      font-family: Lato;
-      font-weight: 200;
       text-align: center;
       margin-top: 24px; }
   writing-full-passage .english-full-paragraphs-wrapper .answer-container {
@@ -602,7 +573,6 @@ writing-specific-paragraph {
       writing-specific-paragraph .writing-specific-paragraph-wrapper .specific-paragraph-view-wrapper .question-container .full-passage-link:hover {
         text-decoration: underline; }
     writing-specific-paragraph .writing-specific-paragraph-wrapper .specific-paragraph-view-wrapper .question-container p {
-      font-weight: 200;
       line-height: 1.5em; }
     writing-specific-paragraph .writing-specific-paragraph-wrapper .specific-paragraph-view-wrapper .answer-container p {
       color: #4f4d4d;
@@ -644,10 +614,6 @@ writing-specific-paragraph {
         width: 900px;
         margin: 0 auto 50px auto; }
         writing-specific-paragraph .writing-specific-paragraph-wrapper .full-passage-view-wrapper .full-passage-wrapper .full-passage p {
-          font-size: 16px;
-          color: #161616;
-          font-family: Lato;
-          font-weight: 200;
           line-height: 1.5em; }
         writing-specific-paragraph .writing-specific-paragraph-wrapper .full-passage-view-wrapper .full-passage-wrapper .full-passage .paragraph-number-title {
           font-size: 16px;
