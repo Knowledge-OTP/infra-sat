@@ -9,7 +9,7 @@ znk-exercise {
                 overflow-y: auto;
 
                 .question-content {
-                    @include text-style(18px, $fontColor4, Lato, $regularFontWeight);
+                    font-size: 18px;
                     margin-bottom: 1em;
                     p:last-child {
                         margin-bottom: 0;

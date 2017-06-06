@@ -12,8 +12,6 @@ article, .article {
     .article-content {
         width: 475px;
         display: inline-block;
-        font-weight: $ultraLightFontWeight;
-        font-size: 16px;
         .num-article {
             @include text-style(15px, $fontColor2, Lato, $thinFontWeight);
             position: absolute;
@@ -37,11 +35,5 @@ article, .article {
         font-size: 14px;
         text-align: center;
         padding: 0 3px;
-    }
-
-    strong {
-        font-family: Lato;
-        font-weight: $lightFontWeight;
-        font-size: 16px;
     }
 }

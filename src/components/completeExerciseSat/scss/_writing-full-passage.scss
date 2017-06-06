@@ -5,12 +5,14 @@ writing-full-passage {
 
         .question-container {
             .paragraph-title {
-                @include text-style(16px, $fontColor3, Lato, $regularFontWeight);
+                font-size: 16px;
+                color: $fontColor3;
                 text-align: center;
             }
 
             p {
-                @include text-style(16px, $fontColor4, Lato, $lightFontWeight);
+                font-size: 16px;
+                color: $fontColor4;
                 margin-top: 13px;
                 line-height: 1.5em;
             }
@@ -21,7 +23,8 @@ writing-full-passage {
 
             .paragraphs-wrapper {
                 .paragraph-number-title {
-                    @include text-style(16px, $fontColor4, Lato, $lightFontWeight);
+                    font-size: 16px;
+                    color: $fontColor4;
                     text-align: center;
                     margin-top: 24px;
                 }
