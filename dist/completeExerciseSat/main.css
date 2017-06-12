@@ -368,7 +368,6 @@ reading-question {
       line-height: 1.5em; }
 
 select-answer {
-  font-size: 18px;
   display: block; }
   select-answer .answer {
     display: -ms-flexbox;
