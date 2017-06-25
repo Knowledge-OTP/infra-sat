@@ -384,7 +384,7 @@
                         .then(function (res) {
                             var testScoreStats = res[0];
                             var testScoreCategory = res[1];
-
+                            $ctrl.showSummaryTimelineAndMastery = testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_180 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_181 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_182 ? true : false;
                             var testScoreName = TestScoreCategoryEnum.getValByEnum(testScoreCategory.id);
                             testScoreName = angular.uppercase(testScoreName);
                             $ctrl.testScoreMastery.testScorename = translateFilter('COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.' + testScoreName);
@@ -1391,17 +1391,13 @@
 
 angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
-    "<div class=\"base-complete-exercise-container\"\n" +
-    "     translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\"\n" +
-    "     subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
-    "     ng-class=\"{\n" +
+    "<div class=\"base-complete-exercise-container\" translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\" subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
+    "    ng-class=\"{\n" +
     "        'workout-summary-wrapper-essay': $ctrl.isEssaySubject\n" +
     "     }\">\n" +
     "    <complete-exercise-header></complete-exercise-header>\n" +
     "    <div class=\"complete-exercise-summary-wrapper\">\n" +
-    "        <social-sharing\n" +
-    "            subject-id=\"::$ctrl.exerciseResult.subjectId\"\n" +
-    "            animate=\"true\">\n" +
+    "        <social-sharing subject-id=\"::$ctrl.exerciseResult.subjectId\" animate=\"true\">\n" +
     "        </social-sharing>\n" +
     "        <div class=\"section\">\n" +
     "            <div class=\"test-score-title\">{{::$ctrl.testScoreTitle}}</div>\n" +
@@ -1411,15 +1407,9 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                        <div class=\"gauge-inner-text\">{{::$ctrl.performanceChart.successRate}}%\n" +
     "                            <div class=\"success-title\" translate=\".SUCCESS\"></div>\n" +
     "                        </div>\n" +
-    "                        <canvas width=\"134\"\n" +
-    "                                height=\"134\"\n" +
-    "                                id=\"doughnut\"\n" +
-    "                                class=\"chart chart-doughnut\"\n" +
-    "                                chart-options=\"$ctrl.performanceChart.gaugeSettings.options\"\n" +
-    "                                chart-colours=\"$ctrl.performanceChart.gaugeSettings.colours\"\n" +
-    "                                chart-data=\"$ctrl.performanceChart.gaugeSettings.data\"\n" +
-    "                                chart-labels=\"$ctrl.performanceChart.gaugeSettings.labels\"\n" +
-    "                                chart-legend=\"false\">\n" +
+    "                        <canvas width=\"134\" height=\"134\" id=\"doughnut\" class=\"chart chart-doughnut\" chart-options=\"$ctrl.performanceChart.gaugeSettings.options\"\n" +
+    "                            chart-colours=\"$ctrl.performanceChart.gaugeSettings.colours\" chart-data=\"$ctrl.performanceChart.gaugeSettings.data\"\n" +
+    "                            chart-labels=\"$ctrl.performanceChart.gaugeSettings.labels\" chart-legend=\"false\">\n" +
     "                        </canvas>\n" +
     "                    </div>\n" +
     "                    <div class=\"statistics\">\n" +
@@ -1427,8 +1417,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                            <div class=\"stat-val correct\">{{::$ctrl.exerciseResult.correctAnswersNum}}</div>\n" +
     "                            <div class=\"title\" translate=\".CORRECT\"></div>\n" +
     "                            <div class=\"avg-score\">\n" +
-    "                            <span translate=\".AVG_TIME\"\n" +
-    "                                  translate-values=\"{\n" +
+    "                                <span translate=\".AVG_TIME\" translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.correctAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
@@ -1438,8 +1427,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                            <div class=\"stat-val wrong\">{{::$ctrl.exerciseResult.wrongAnswersNum}}</div>\n" +
     "                            <div class=\"title\" translate=\".WRONG\"></div>\n" +
     "                            <div class=\"avg-score\">\n" +
-    "                            <span translate=\".AVG_TIME\"\n" +
-    "                                  translate-values=\"{\n" +
+    "                                <span translate=\".AVG_TIME\" translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.wrongAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
@@ -1449,8 +1437,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                            <div class=\"stat-val skipped\">{{::$ctrl.exerciseResult.skippedAnswersNum}}</div>\n" +
     "                            <div class=\"title\" translate=\".SKIPPED\"></div>\n" +
     "                            <div class=\"avg-score\">\n" +
-    "                            <span translate=\".AVG_TIME\"\n" +
-    "                                  translate-values=\"{\n" +
+    "                                <span translate=\".AVG_TIME\" translate-values=\"{\n" +
     "                                    avgTime: $ctrl.statsTime.skippedAvgTime\n" +
     "                                  }\">\n" +
     "                            </span>\n" +
@@ -1462,51 +1449,38 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                <div class=\"category-name\">{{$ctrl.categoryName | cutString: 42}}</div>\n" +
     "            </div>\n" +
     "            <div class=\"review-btn-wrapper\">\n" +
-    "                <md-button class=\"md-primary znk\"\n" +
-    "                           aria-label=\"{{'COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.REVIEW' | translate}}\"\n" +
-    "                           tabindex=\"1\"\n" +
-    "                           md-no-ink\n" +
-    "                           ng-cloak\n" +
-    "                           ng-click=\"$ctrl.goToSummary()\">\n" +
+    "                <md-button class=\"md-primary znk\" aria-label=\"{{'COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.REVIEW' | translate}}\" tabindex=\"1\"\n" +
+    "                    md-no-ink ng-cloak ng-click=\"$ctrl.goToSummary()\">\n" +
     "                    <span translate=\".REVIEW\"></span>\n" +
     "                </md-button>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"section time-line-wrapper2\"\n" +
-    "                 ng-if=\"!$ctrl.isEssaySubject\"\n" +
-    "                 ng-class=\"{\n" +
+    "        <div class=\"section time-line-wrapper2\" ng-if=\"!$ctrl.isEssaySubject && !$ctrl.showSummaryTimelineAndMastery\" ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
-    "        <div class=\"estimated-score-title\">\n" +
-    "            <span translate=\"SUBJECTS.{{$ctrl.exerciseResult.subjectId}}\"></span>\n" +
-    "            <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
-    "        <performance-timeline\n" +
-    "            on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\"\n" +
-    "            subject-id=\"{{::$ctrl.exerciseResult.subjectId}}\"\n" +
-    "            show-induction=\"true\"\n" +
-    "            active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
-    "        </performance-timeline>\n" +
-    "    </div>\n" +
-    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary\">\n" +
+    "            <div class=\"estimated-score-title\">\n" +
+    "                <span translate=\"SUBJECTS.{{$ctrl.exerciseResult.subjectId}}\"></span>\n" +
+    "                <span translate=\".ESTIMATED_SCORE\"></span></div>\n" +
+    "            <performance-timeline on-timeline-finish=\"$ctrl.onTimelineFinish(subjectDelta)\" subject-id=\"{{::$ctrl.exerciseResult.subjectId}}\"\n" +
+    "                show-induction=\"true\" active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
+    "            </performance-timeline>\n" +
+    "        </div>\n" +
+    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary && && !$ctrl.showSummaryTimelineAndMastery\">\n" +
     "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
     "            <div class=\"row data-row\">\n" +
     "                <div class=\"subject-level\">\n" +
     "                    <div class=\"test-score-name\">{{::$ctrl.testScoreMastery.testScorename}}</div>\n" +
     "                    <div class=\"subject-progress\">\n" +
     "                        <div class=\"progress\">\n" +
-    "                            <div znk-progress-bar progress-width=\"{{::$ctrl.testScoreMastery.progress}}\"\n" +
-    "                                 show-progress-value=\"false\"></div>\n" +
+    "                            <div znk-progress-bar progress-width=\"{{::$ctrl.testScoreMastery.progress}}\" show-progress-value=\"false\"></div>\n" +
     "                            <div class=\"title\" translate=\".MASTERY\"></div>\n" +
     "                        </div>\n" +
     "                        <div class=\"progress-val\">\n" +
     "                            {{::$ctrl.testScoreMastery.progress}}%\n" +
-    "                            <div class=\"progress-perfect\"\n" +
-    "                                 ng-class=\"{\n" +
+    "                            <div class=\"progress-perfect\" ng-class=\"{\n" +
     "                                'bad-score': $ctrl.testScoreDelta<0\n" +
-    "                             }\"\n" +
-    "                                 ng-if=\"$ctrl.testScoreDelta != 0\">\n" +
-    "                                <span ng-if=\"$ctrl.testScoreDelta > 0\">+</span>\n" +
-    "                                {{$ctrl.testScoreDelta | number : 0}}\n" +
+    "                             }\" ng-if=\"$ctrl.testScoreDelta != 0\">\n" +
+    "                                <span ng-if=\"$ctrl.testScoreDelta > 0\">+</span> {{$ctrl.testScoreDelta | number : 0}}\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "\n" +
@@ -1516,14 +1490,14 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                    <div class=\"category-level\" ng-repeat=\"(key, category) in $ctrl.categoryMastery\">\n" +
     "                        <div class=\"category-data\">\n" +
     "                            <div class=\"category-level-name\">{{category.name}}</div>\n" +
-    "                            <div znk-progress-bar progress-width=\"{{category.progress}}\"\n" +
-    "                                 progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>\n" +
+    "                            <div znk-progress-bar progress-width=\"{{category.progress}}\" progress-value=\"{{category.progress}}\" show-progress-value=\"false\"></div>\n" +
     "                            <div class=\"level\">{{category.mastery}}</div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "        <div class=\"general-test-info-msg\" ng-if=\"!$ctrl.showSummaryTimelineAndMastery\" translate=\".GENERAL_TEST_INFO_MSG\"></div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");

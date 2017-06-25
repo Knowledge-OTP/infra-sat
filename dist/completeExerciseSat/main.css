@@ -743,7 +743,8 @@ complete-exercise-summary .complete-exercise-summary-wrapper {
     position: relative;
     top: 40px;
     left: 44px; }
-    complete-exercise-summary .complete-exercise-summary-wrapper .statistics .stat-row:nth-child(1):after, complete-exercise-summary .complete-exercise-summary-wrapper .statistics .stat-row:nth-child(2):after {
+    complete-exercise-summary .complete-exercise-summary-wrapper .statistics .stat-row:nth-child(1):after,
+    complete-exercise-summary .complete-exercise-summary-wrapper .statistics .stat-row:nth-child(2):after {
       content: "";
       position: absolute;
       top: 7px;
@@ -926,13 +927,19 @@ complete-exercise-summary .complete-exercise-summary-wrapper {
           complete-exercise-summary .complete-exercise-summary-wrapper .proficiency-level-row .data-row .category-level-wrap .category-level .category-data .progress-wrap {
             width: 175px;
             height: 5px; }
+  complete-exercise-summary .complete-exercise-summary-wrapper .general-test-info-msg {
+    color: #757a83;
+    font-family: Lato;
+    margin: auto; }
   complete-exercise-summary .complete-exercise-summary-wrapper.math .progress-wrap .progress {
     background-color: #AF89D2; }
-  complete-exercise-summary .complete-exercise-summary-wrapper [znk-progress-bar], complete-exercise-summary .complete-exercise-summary-wrapper znk-progress-bar {
+  complete-exercise-summary .complete-exercise-summary-wrapper [znk-progress-bar],
+  complete-exercise-summary .complete-exercise-summary-wrapper znk-progress-bar {
     height: 0; }
   complete-exercise-summary .complete-exercise-summary-wrapper.workout-summary-wrapper-essay .time-line-wrapper2 {
     display: none; }
-  complete-exercise-summary .complete-exercise-summary-wrapper.workout-summary-wrapper-essay .proficiency-level-row, complete-exercise-summary .complete-exercise-summary-wrapper.workout-summary-wrapper-essay .social-share {
+  complete-exercise-summary .complete-exercise-summary-wrapper.workout-summary-wrapper-essay .proficiency-level-row,
+  complete-exercise-summary .complete-exercise-summary-wrapper.workout-summary-wrapper-essay .social-share {
     background-color: #fafafa; }
 
 screen-sharing complete-exercise-summary .complete-exercise-summary-wrapper {
