@@ -62,7 +62,7 @@
                 </md-button>
             </div>
         </div>
-        <div class="section time-line-wrapper2" ng-if="!$ctrl.isEssaySubject && !$ctrl.showSummaryTimelineAndMastery" ng-class="{
+        <div class="section time-line-wrapper2" ng-if="!$ctrl.isEssaySubject && !$ctrl.hideSummaryTimelineAndMastery" ng-class="{
                 'seen-summary': $ctrl.seenSummary
              }">
             <div class="estimated-score-title">
@@ -72,7 +72,7 @@
                 show-induction="true" active-exercise-id="::$ctrl.exerciseContent.id">
             </performance-timeline>
         </div>
-        <div class="section proficiency-level-row animate-if" ng-if="$ctrl.notSeenSummary && && !$ctrl.showSummaryTimelineAndMastery">
+        <div class="section proficiency-level-row animate-if" ng-if="$ctrl.notSeenSummary && && !$ctrl.hideSummaryTimelineAndMastery">
             <div class="proficiency-title-row" translate=".MASTERY_LEVEL"></div>
             <div class="row data-row">
                 <div class="subject-level">
@@ -104,6 +104,6 @@
                 </div>
             </div>
         </div>
-        <div class="general-test-info-msg" ng-if="!$ctrl.showSummaryTimelineAndMastery" translate=".GENERAL_TEST_INFO_MSG"></div>
+        <div class="general-test-info-msg" ng-if="$ctrl.hideSummaryTimelineAndMastery" translate=".GENERAL_TEST_INFO_MSG"></div>
     </div>
 </div>

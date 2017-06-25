@@ -384,7 +384,7 @@
                         .then(function (res) {
                             var testScoreStats = res[0];
                             var testScoreCategory = res[1];
-                            $ctrl.showSummaryTimelineAndMastery = testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_180 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_181 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_182 ? true : false;
+                            $ctrl.hideSummaryTimelineAndMastery = testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_180 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_181 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_182 ? true : false;
                             var testScoreName = TestScoreCategoryEnum.getValByEnum(testScoreCategory.id);
                             testScoreName = angular.uppercase(testScoreName);
                             $ctrl.testScoreMastery.testScorename = translateFilter('COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.' + testScoreName);
@@ -1455,7 +1455,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                </md-button>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"section time-line-wrapper2\" ng-if=\"!$ctrl.isEssaySubject && !$ctrl.showSummaryTimelineAndMastery\" ng-class=\"{\n" +
+    "        <div class=\"section time-line-wrapper2\" ng-if=\"!$ctrl.isEssaySubject && !$ctrl.hideSummaryTimelineAndMastery\" ng-class=\"{\n" +
     "                'seen-summary': $ctrl.seenSummary\n" +
     "             }\">\n" +
     "            <div class=\"estimated-score-title\">\n" +
@@ -1465,7 +1465,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                show-induction=\"true\" active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "            </performance-timeline>\n" +
     "        </div>\n" +
-    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary && && !$ctrl.showSummaryTimelineAndMastery\">\n" +
+    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary && && !$ctrl.hideSummaryTimelineAndMastery\">\n" +
     "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
     "            <div class=\"row data-row\">\n" +
     "                <div class=\"subject-level\">\n" +
@@ -1497,7 +1497,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"general-test-info-msg\" ng-if=\"!$ctrl.showSummaryTimelineAndMastery\" translate=\".GENERAL_TEST_INFO_MSG\"></div>\n" +
+    "        <div class=\"general-test-info-msg\" ng-if=\"$ctrl.hideSummaryTimelineAndMastery\" translate=\".GENERAL_TEST_INFO_MSG\"></div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
