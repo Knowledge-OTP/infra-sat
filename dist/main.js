@@ -1465,7 +1465,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     "                show-induction=\"true\" active-exercise-id=\"::$ctrl.exerciseContent.id\">\n" +
     "            </performance-timeline>\n" +
     "        </div>\n" +
-    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary && && !$ctrl.hideSummaryTimelineAndMastery\">\n" +
+    "        <div class=\"section proficiency-level-row animate-if\" ng-if=\"$ctrl.notSeenSummary && !$ctrl.hideSummaryTimelineAndMastery\">\n" +
     "            <div class=\"proficiency-title-row\" translate=\".MASTERY_LEVEL\"></div>\n" +
     "            <div class=\"row data-row\">\n" +
     "                <div class=\"subject-level\">\n" +
