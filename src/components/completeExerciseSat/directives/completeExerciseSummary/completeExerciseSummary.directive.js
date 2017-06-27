@@ -157,7 +157,9 @@
                         .then(function (res) {
                             var testScoreStats = res[0];
                             var testScoreCategory = res[1];
-                            $ctrl.hideSummaryTimelineAndMastery = testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_180 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_181 || TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_182 ? true : false;
+                            $ctrl.hideSummaryTimelineAndMastery = testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_180.enum ||
+                             testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_181.enum ||
+                              testScoreCategory.id === TestScoreCategoryEnum.GENERAL_TEST_INFORMATION_182.enum ? true : false;
                             var testScoreName = TestScoreCategoryEnum.getValByEnum(testScoreCategory.id);
                             testScoreName = angular.uppercase(testScoreName);
                             $ctrl.testScoreMastery.testScorename = translateFilter('COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY.' + testScoreName);
