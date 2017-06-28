@@ -3110,7 +3110,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
                 5: [95, 95, 75, 75]
             };
             EstimatedScoreEventsHandlerSrvProvider.setDiagnosticScoring(diagnosticScoringMap);
-
+// 1st pos = correct within allowed time, 2nd pos = correct outside allowed time , 3ed pos = wrong within allowed time, 4th pos = wrong outside allowed time
             var exerciseRawPoints = [1, 1, 0, 0];
             var sectionRawPoints = [1, 0, 0, 0];
             EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, sectionRawPoints);
@@ -3121,8 +3121,8 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    var exerciseSubjedctId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
-                    return exerciseSubjedctId !== SubjectEnum.ESSAY.enum;
+                    var exerciseSubjectId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    return exerciseSubjectId !== SubjectEnum.ESSAY.enum;
                 };
             }
 
