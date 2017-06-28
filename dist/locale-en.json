@@ -13,7 +13,8 @@
             "READING": "READING",
             "WRITING": "WRITING",
             "ESSAY": "ESSAY",
-            "MASTERY": "mastery"
+            "MASTERY": "mastery",
+            "GENERAL_TEST_INFO_MSG": "This is a \"General Test Information\" exercise. Your estimated score will not be affected by your performance in this exercise."
         }
     },
     "SOCIAL_SHARING_CONTAINER_DRV": {
