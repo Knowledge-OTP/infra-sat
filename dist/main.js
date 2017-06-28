@@ -3077,7 +3077,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
             rawScoreToScoreFnGetter.$inject = ["ScoringService"];
             eventProcessControl.$inject = ["SubjectEnum"];
             var categoryService = CategoryServiceProvider.$get();
-        
+
             var subjectsRawScoreEdges = {};
             subjectsRawScoreEdges[SubjectEnumConst.VERBAL] = {
                 min: 0,
@@ -3110,18 +3110,19 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
                 5: [95, 95, 75, 75]
             };
             EstimatedScoreEventsHandlerSrvProvider.setDiagnosticScoring(diagnosticScoringMap);
-
-            var defaultRawPointsForExercise = [1, 0, 0, 0];
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, defaultRawPointsForExercise);
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.TUTORIAL, defaultRawPointsForExercise);
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.PRACTICE, defaultRawPointsForExercise);
+// 1st pos = correct within allowed time, 2nd pos = correct outside allowed time , 3ed pos = wrong within allowed time, 4th pos = wrong outside allowed time
+            var exerciseRawPoints = [1, 1, 0, 0];
+            var sectionRawPoints = [1, 0, 0, 0];
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, sectionRawPoints);
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.TUTORIAL, exerciseRawPoints);
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.PRACTICE, exerciseRawPoints);
 
             function eventProcessControl(SubjectEnum) {
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    var exerciseSubjedctId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
-                    return exerciseSubjedctId !== SubjectEnum.ESSAY.enum;
+                    var exerciseSubjectId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    return exerciseSubjectId !== SubjectEnum.ESSAY.enum;
                 };
             }
 
