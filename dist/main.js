@@ -3077,7 +3077,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
             rawScoreToScoreFnGetter.$inject = ["ScoringService"];
             eventProcessControl.$inject = ["SubjectEnum"];
             var categoryService = CategoryServiceProvider.$get();
-        
+
             var subjectsRawScoreEdges = {};
             subjectsRawScoreEdges[SubjectEnumConst.VERBAL] = {
                 min: 0,
@@ -3111,10 +3111,11 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
             };
             EstimatedScoreEventsHandlerSrvProvider.setDiagnosticScoring(diagnosticScoringMap);
 
-            var defaultRawPointsForExercise = [1, 0, 0, 0];
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, defaultRawPointsForExercise);
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.TUTORIAL, defaultRawPointsForExercise);
-            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.PRACTICE, defaultRawPointsForExercise);
+            var exerciseRawPoints = [1, 1, 0, 0];
+            var sectionRawPoints = [1, 0, 0, 0];
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, sectionRawPoints);
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.TUTORIAL, exerciseRawPoints);
+            EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.PRACTICE, exerciseRawPoints);
 
             function eventProcessControl(SubjectEnum) {
                 'ngInject';//jshint ignore:line

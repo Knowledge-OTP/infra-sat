@@ -40,7 +40,6 @@
             };
             EstimatedScoreEventsHandlerSrvProvider.setDiagnosticScoring(diagnosticScoringMap);
 
-            var defaultRawPointsForExercise = [1, 0, 0, 0];
             var exerciseRawPoints = [1, 1, 0, 0];
             var sectionRawPoints = [1, 0, 0, 0];
             EstimatedScoreEventsHandlerSrvProvider.setExerciseRawPoints(exerciseTypeConst.SECTION, sectionRawPoints);
