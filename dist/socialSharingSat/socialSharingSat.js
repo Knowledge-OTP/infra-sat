@@ -11,7 +11,7 @@
     'use strict';
 
     angular.module('znk.infra-sat.socialSharingSat')
-        .config(["EstimatedScoreSrvProvider", "SubjectEnumConst", "EstimatedScoreEventsHandlerSrvProvider", "exerciseTypeConst", "CategoryServiceProvider", function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst,EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst, CategoryServiceProvider) {
+        .config(["EstimatedScoreSrvProvider", "SubjectEnumConst", "EstimatedScoreEventsHandlerSrvProvider", "exerciseTypeConst", "CategoryServiceProvider", function estimatedScoreConfig(EstimatedScoreSrvProvider, SubjectEnumConst, EstimatedScoreEventsHandlerSrvProvider, exerciseTypeConst, CategoryServiceProvider) {
             'ngInject';
 
             rawScoreToScoreFnGetter.$inject = ["ScoringService"];
