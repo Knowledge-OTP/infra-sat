@@ -13,7 +13,7 @@
     angular.module('znk.infra-sat.configSat')
         .config(["LiveSessionSubjectSrvProvider", "LiveSessionSubjectConst", function (LiveSessionSubjectSrvProvider, LiveSessionSubjectConst) {
         'ngInject';
-        var topics = [LiveSessionSubjectConst.MATH];
+        var topics = [LiveSessionSubjectConst.MATH, LiveSessionSubjectConst.ENGLISH];
         LiveSessionSubjectSrvProvider.setLiveSessionTopics(topics);
 
     }]);
