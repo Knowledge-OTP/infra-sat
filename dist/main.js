@@ -1391,7 +1391,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\" translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\" subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
     "    ng-class=\"{\n" +
@@ -1760,8 +1760,21 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
     'use strict';
 
     angular.module('znk.infra-sat.configSat', [
-        'znk.infra.exerciseUtility'
+        'znk.infra.exerciseUtility',
+        'znk.infra-web-app.liveSession'
     ]);
+})(angular);
+
+(function (angular) {
+    'use strict';
+
+    angular.module('znk.infra-sat.configSat')
+        .config(["LiveSessionSubjectSrvProvider", "LiveSessionSubjectConst", function (LiveSessionSubjectSrvProvider, LiveSessionSubjectConst) {
+        'ngInject';
+        var topics = [LiveSessionSubjectConst.MATH, LiveSessionSubjectConst.ENGLISH];
+        LiveSessionSubjectSrvProvider.setLiveSessionTopics(topics);
+
+    }]);
 })(angular);
 
 (function () {
@@ -1929,7 +1942,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
         }]);
 })();
 
-angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/configSat/svg/znk-app-name-logo.svg",
     "<svg version=\"1.1\" id=\"SAT\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"-187 363 236 67\" class=\"znk-app-name-logo\">\n" +
     "<style type=\"text/css\">\n" +
@@ -2208,7 +2221,7 @@ angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($temp
         }]);
 })();
 
-angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -2325,7 +2338,7 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($te
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -2365,7 +2378,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
     }]);
 })(angular);
 
-angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -3020,7 +3033,7 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($te
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.performance').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.performance').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/performance/directives/performanceTimeline/performanceTimeline.template.html",
     "<div class=\"performance-timeline znk-scrollbar\" translate-namespace=\"PERFORMANCE_TIMELINE\">\n" +
     "    <div class=\"time-line-wrapper\">\n" +
@@ -3297,7 +3310,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function ($te
         });
 })(angular);
 
-angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function($templateCache) {
 
 }]);
 
@@ -3410,6 +3423,6 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.userGoals').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.userGoals').run(['$templateCache', function($templateCache) {
 
 }]);

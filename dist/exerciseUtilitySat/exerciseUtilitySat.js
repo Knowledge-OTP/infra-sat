@@ -111,6 +111,6 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function($templateCache) {
 
 }]);
