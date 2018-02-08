@@ -105,7 +105,8 @@
                 angular.forEach(mergeSections, function (section) {
                     angular.forEach(section.questionResults, function (questionResult) {
                         var subScoresArrProm = SubScoreSrv.getSpecificCategorySubScores(questionResult.categoryId);
-                        var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                        var sectionSubjectId = !(typeof section.subjectId === 'undefined' || section.subjectId === null) ?
+                            section.subjectId : CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
                         subScoresArrProm.then(function (subScoresArr) {
                             if (subScoresArr.length > 0) {
                                 angular.forEach(subScoresArr, function (subScore) {
