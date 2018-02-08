@@ -1331,13 +1331,15 @@
                 resultsData = angular.copy(resultsData);
                 questionsData = angular.copy(questionsData);
                 var examId = exam.id;
-                var questionSubjectId = CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
+                var questionSubjectId = !(typeof questionsData.subjectId === 'undefined' || questionsData.subjectId === null) ?
+                    questionsData.subjectId : CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
                 var subjectId = questionSubjectId;                
                 var sectionResults = examResult.sectionResults;
                 var sectionProms = [];
                 var currentSectionId = questionsData.id;
                 var getOtherSections = exam.sections.filter(function (section) {
-                    var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                    var sectionSubjectId = !(typeof section.subjectId === 'undefined' || section.subjectId === null) ?
+                        section.subjectId : CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
                     return sectionSubjectId === subjectId && currentSectionId !== section.id;
                 });
                 angular.forEach(getOtherSections, function (sectionBySubject) {
@@ -1377,7 +1379,8 @@
                 // only if it's section and not essay, save score!
                 if (isSection && !isEssay) {
                     prepareDataForExerciseFinish(data).then(function (result) {
-                        var exerciseSubjectId = CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
+                        var exerciseSubjectId = !(typeof result.exercise.subjectId === 'undefined' || result.exercise.subjectId === null) ?
+                            result.exercise.subjectId : CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
                         if (result.sectionScoring) {
                             saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, exerciseSubjectId);
                         }
@@ -1391,7 +1394,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\" translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\" subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
     "    ng-class=\"{\n" +
@@ -1942,7 +1945,7 @@ angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', funct
         }]);
 })();
 
-angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/configSat/svg/znk-app-name-logo.svg",
     "<svg version=\"1.1\" id=\"SAT\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"-187 363 236 67\" class=\"znk-app-name-logo\">\n" +
     "<style type=\"text/css\">\n" +
@@ -2132,7 +2135,8 @@ angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templ
                 angular.forEach(mergeSections, function (section) {
                     angular.forEach(section.questionResults, function (questionResult) {
                         var subScoresArrProm = SubScoreSrv.getSpecificCategorySubScores(questionResult.categoryId);
-                        var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                        var sectionSubjectId = !(typeof section.subjectId === 'undefined' || section.subjectId === null) ?
+                            section.subjectId : CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
                         subScoresArrProm.then(function (subScoresArr) {
                             if (subScoresArr.length > 0) {
                                 angular.forEach(subScoresArr, function (subScore) {
@@ -2221,7 +2225,7 @@ angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templ
         }]);
 })();
 
-angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.examUtility').run(['$templateCache', function ($templateCache) {
 
 }]);
 
@@ -2338,7 +2342,7 @@ angular.module('znk.infra-sat.examUtility').run(['$templateCache', function($tem
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', function ($templateCache) {
 
 }]);
 
@@ -2378,7 +2382,7 @@ angular.module('znk.infra-sat.exerciseUtilitySat').run(['$templateCache', functi
     }]);
 })(angular);
 
-angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function ($templateCache) {
 
 }]);
 
@@ -3035,7 +3039,7 @@ angular.module('znk.infra-sat.lessonTopic').run(['$templateCache', function($tem
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.performance').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.performance').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/performance/directives/performanceTimeline/performanceTimeline.template.html",
     "<div class=\"performance-timeline znk-scrollbar\" translate-namespace=\"PERFORMANCE_TIMELINE\">\n" +
     "    <div class=\"time-line-wrapper\">\n" +
@@ -3136,7 +3140,8 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function($tem
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    var exerciseSubjectId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    var exerciseSubjectId = !(typeof exercise.subjectId === 'undefined' || exercise.subjectId === null) ?
+                        exercise.subjectId : categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
                     return exerciseSubjectId !== SubjectEnum.ESSAY.enum;
                 };
             }
@@ -3312,7 +3317,7 @@ angular.module('znk.infra-sat.performance').run(['$templateCache', function($tem
         });
 })(angular);
 
-angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function ($templateCache) {
 
 }]);
 
@@ -3425,6 +3430,6 @@ angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.userGoals').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.userGoals').run(['$templateCache', function ($templateCache) {
 
 }]);

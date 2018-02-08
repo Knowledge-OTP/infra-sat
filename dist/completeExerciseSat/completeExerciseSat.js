@@ -1316,13 +1316,15 @@
                 resultsData = angular.copy(resultsData);
                 questionsData = angular.copy(questionsData);
                 var examId = exam.id;
-                var questionSubjectId = CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
+                var questionSubjectId = !(typeof questionsData.subjectId === 'undefined' || questionsData.subjectId === null) ?
+                    questionsData.subjectId : CategoryService.getCategoryLevel1ParentSync([questionsData.categoryId, questionsData.categoryId2]);
                 var subjectId = questionSubjectId;                
                 var sectionResults = examResult.sectionResults;
                 var sectionProms = [];
                 var currentSectionId = questionsData.id;
                 var getOtherSections = exam.sections.filter(function (section) {
-                    var sectionSubjectId = CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
+                    var sectionSubjectId = !(typeof section.subjectId === 'undefined' || section.subjectId === null) ?
+                        section.subjectId : CategoryService.getCategoryLevel1ParentSync([section.categoryId, section.categoryId2]);
                     return sectionSubjectId === subjectId && currentSectionId !== section.id;
                 });
                 angular.forEach(getOtherSections, function (sectionBySubject) {
@@ -1362,7 +1364,8 @@
                 // only if it's section and not essay, save score!
                 if (isSection && !isEssay) {
                     prepareDataForExerciseFinish(data).then(function (result) {
-                        var exerciseSubjectId = CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
+                        var exerciseSubjectId = !(typeof result.exercise.subjectId === 'undefined' || result.exercise.subjectId === null) ?
+                            result.exercise.subjectId : CategoryService.getCategoryLevel1ParentSync([result.exercise.categoryId, result.exercise.categoryId2]);
                         if (result.sectionScoring) {
                             saveSectionScoring(result.examResult, result.sectionScoring.sectionScore, exerciseSubjectId);
                         }
@@ -1376,7 +1379,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.completeExerciseSat').run(['$templateCache', function ($templateCache) {
   $templateCache.put("components/completeExerciseSat/directives/completeExerciseSummary/completeExerciseSummaryDirective.template.html",
     "<div class=\"base-complete-exercise-container\" translate-namespace=\"COMPLETE_EXERCISE_SAT.COMPLETE_EXERCISE_SUMMARY\" subject-id-to-attr-drv=\"$ctrl.currentSubjectId\"\n" +
     "    ng-class=\"{\n" +
