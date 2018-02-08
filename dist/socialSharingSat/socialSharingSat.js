@@ -61,7 +61,8 @@
                 'ngInject';//jshint ignore:line
 
                 return function (exerciseType, exercise) {
-                    var exerciseSubjectId = categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
+                    var exerciseSubjectId = !(typeof exercise.subjectId === 'undefined' || exercise.subjectId === null) ?
+                        exercise.subjectId : categoryService.getCategoryLevel1ParentSync([exercise.categoryId, exercise.categoryId2]);
                     return exerciseSubjectId !== SubjectEnum.ESSAY.enum;
                 };
             }
@@ -237,6 +238,6 @@
         });
 })(angular);
 
-angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function($templateCache) {
+angular.module('znk.infra-sat.socialSharingSat').run(['$templateCache', function ($templateCache) {
 
 }]);
