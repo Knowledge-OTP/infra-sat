@@ -2,8 +2,21 @@
     'use strict';
 
     angular.module('znk.infra-sat.configSat', [
-        'znk.infra.exerciseUtility'
+        'znk.infra.exerciseUtility',
+        'znk.infra-web-app.liveSession'
     ]);
+})(angular);
+
+(function (angular) {
+    'use strict';
+
+    angular.module('znk.infra-sat.configSat')
+        .config(["LiveSessionSubjectSrvProvider", "LiveSessionSubjectConst", function (LiveSessionSubjectSrvProvider, LiveSessionSubjectConst) {
+        'ngInject';
+        var topics = [LiveSessionSubjectConst.MATH, LiveSessionSubjectConst.ENGLISH];
+        LiveSessionSubjectSrvProvider.setLiveSessionTopics(topics);
+
+    }]);
 })(angular);
 
 (function () {
@@ -171,7 +184,7 @@
         }]);
 })();
 
-angular.module('znk.infra-sat.configSat').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.configSat').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/configSat/svg/znk-app-name-logo.svg",
     "<svg version=\"1.1\" id=\"SAT\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"-187 363 236 67\" class=\"znk-app-name-logo\">\n" +
     "<style type=\"text/css\">\n" +

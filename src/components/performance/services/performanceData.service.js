@@ -312,7 +312,7 @@
 
             function _calcSubScoreSpecificCategory(_performanceData, allSpecificCategories, specificStats) {
                 angular.forEach(specificStats, function (specificCategoryStats, categoryId) {
-                    categoryId = categoryId.replace('id_', '');
+                    categoryId = specificCategoryStats.id;
                     var subjectId = specificCategoryStats.parentsIds[specificCategoryStats.parentsIds.length - 1];
                     var categorySubScore1 = allSpecificCategories[categoryId].subScore1Id;
                     var categorySubScore2 = allSpecificCategories[categoryId].subScore2Id;
@@ -324,14 +324,16 @@
                                     subscoreData.specificArray = [];
                                 }
 
-                                subscoreData.specificArray.push({
-                                    id: categoryId,
-                                    name: allSpecificCategories[categoryId].name,
-                                    levelProgress: _getProgressPercentage(specificCategoryStats.totalQuestions, specificCategoryStats.correct),
-                                    correct: specificCategoryStats.correct,
-                                    wrong: specificCategoryStats.wrong,
-                                    totalQuestions: specificCategoryStats.totalQuestions
-                                });
+                                if (allSpecificCategories[categoryId]) {
+                                    subscoreData.specificArray.push({
+                                        id: categoryId,
+                                        name: allSpecificCategories[categoryId].name,
+                                        levelProgress: _getProgressPercentage(specificCategoryStats.totalQuestions, specificCategoryStats.correct),
+                                        correct: specificCategoryStats.correct,
+                                        wrong: specificCategoryStats.wrong,
+                                        totalQuestions: specificCategoryStats.totalQuestions
+                                    });
+                                }
                             }
                         });
                     }

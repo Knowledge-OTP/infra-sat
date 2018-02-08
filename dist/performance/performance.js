@@ -586,7 +586,7 @@
 
             function _calcSubScoreSpecificCategory(_performanceData, allSpecificCategories, specificStats) {
                 angular.forEach(specificStats, function (specificCategoryStats, categoryId) {
-                    categoryId = categoryId.replace('id_', '');
+                    categoryId = specificCategoryStats.id;
                     var subjectId = specificCategoryStats.parentsIds[specificCategoryStats.parentsIds.length - 1];
                     var categorySubScore1 = allSpecificCategories[categoryId].subScore1Id;
                     var categorySubScore2 = allSpecificCategories[categoryId].subScore2Id;
@@ -598,14 +598,16 @@
                                     subscoreData.specificArray = [];
                                 }
 
-                                subscoreData.specificArray.push({
-                                    id: categoryId,
-                                    name: allSpecificCategories[categoryId].name,
-                                    levelProgress: _getProgressPercentage(specificCategoryStats.totalQuestions, specificCategoryStats.correct),
-                                    correct: specificCategoryStats.correct,
-                                    wrong: specificCategoryStats.wrong,
-                                    totalQuestions: specificCategoryStats.totalQuestions
-                                });
+                                if (allSpecificCategories[categoryId]) {
+                                    subscoreData.specificArray.push({
+                                        id: categoryId,
+                                        name: allSpecificCategories[categoryId].name,
+                                        levelProgress: _getProgressPercentage(specificCategoryStats.totalQuestions, specificCategoryStats.correct),
+                                        correct: specificCategoryStats.correct,
+                                        wrong: specificCategoryStats.wrong,
+                                        totalQuestions: specificCategoryStats.totalQuestions
+                                    });
+                                }
                             }
                         });
                     }
@@ -649,7 +651,7 @@
         }]);
 })(angular);
 
-angular.module('znk.infra-sat.performance').run(['$templateCache', function ($templateCache) {
+angular.module('znk.infra-sat.performance').run(['$templateCache', function($templateCache) {
   $templateCache.put("components/performance/directives/performanceTimeline/performanceTimeline.template.html",
     "<div class=\"performance-timeline znk-scrollbar\" translate-namespace=\"PERFORMANCE_TIMELINE\">\n" +
     "    <div class=\"time-line-wrapper\">\n" +
